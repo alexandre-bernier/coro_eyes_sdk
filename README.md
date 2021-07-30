@@ -8,4 +8,4 @@ SDK for a structured light 3D vision system using the TI LightCrafter 4500 EVM a
 #### Dependencies
 - [OpenCV4](https://opencv.org/)
 
-	sudo apt install libopencv-dev
+		sudo apt install libopencv-dev
