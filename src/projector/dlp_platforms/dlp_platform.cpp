@@ -16,14 +16,12 @@
 /** @brief  Contains all DLP SDK classes, functions, etc. */
 namespace dlp{
 
-
 /** @brief Constructs object */
 DLP_Platform::DLP_Platform(){
     this->id_   = "";
 
     this->rows_     = 0;
     this->columns_  = 0;
-
 
     this->mirror_array_config_.columns = 0;
     this->mirror_array_config_.rows = 0;
@@ -33,7 +31,6 @@ DLP_Platform::DLP_Platform(){
     this->mirror_array_config_.shift_odd_rows = false;
     this->mirror_array_config_.shift_column_distance = 0.0;
     this->mirror_array_config_.shift_row_distance = 0.0;
-
 
     this->platform_.Set(Platform::INVALID);
     this->mirror_.Set(Mirror::INVALID);
@@ -406,6 +403,8 @@ template <> std::string ToString<dlp::DLP_Platform::Platform>( dlp::DLP_Platform
 namespace String{
 
 template <> dlp::DLP_Platform::Mirror ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
+
     // Ignore base variable
     if (text.compare("ORTHOGONAL") == 0){
         return dlp::DLP_Platform::Mirror::ORTHOGONAL;
@@ -419,6 +418,8 @@ template <> dlp::DLP_Platform::Mirror ToNumber( const std::string &text, unsigne
 }
 
 template <> dlp::DLP_Platform::Platform ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
+
     // Ignore base variable
     if (text.compare("LIGHTCRAFTER_3000") == 0){
         return dlp::DLP_Platform::Platform::LIGHTCRAFTER_3000;

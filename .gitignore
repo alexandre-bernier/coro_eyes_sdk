@@ -11,3 +11,7 @@ CTestTestfile.cmake
 _deps
 
 build/
+
+!doc/CMakeLists.txt
+!doc/Doxyfile*
+doc/

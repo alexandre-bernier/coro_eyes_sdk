@@ -353,7 +353,6 @@ ReturnCode LCr4500::Setup(const dlp::Parameters &settings){
 
     }
 
-
     if(setup_default || settings.Contains(this->led_red_edge_delay_falling_)
                      || settings.Contains(this->led_red_edge_delay_rising_)){
         // Get the settings
@@ -409,7 +408,6 @@ ReturnCode LCr4500::Setup(const dlp::Parameters &settings){
         if(DLPC350_SetPortClock(this->parallel_port_clock_.Get()) < 0)
             return ret.AddError(LCR4500_SETUP_PARALLEL_PORT_CLOCK_FAILED);
     }
-
 
     /*
 	if(setup_default || settings.Contains(this->parallel_data_swap_)){
@@ -517,8 +515,6 @@ ReturnCode LCr4500::Setup(const dlp::Parameters &settings){
 
     }
 
-
-
     if(settings.Contains(Parameters::VideoFlashImage())){
         // Get the value
         Parameters::VideoFlashImage flash_image;
@@ -556,33 +552,28 @@ ReturnCode LCr4500::Setup(const dlp::Parameters &settings){
 
     }
 
-
     if(settings.Contains(this->trigger_source_)){
 
         // Get the value and check that it existed
         settings.Get(&this->trigger_source_);
-
     }
 
     if(settings.Contains(this->sequence_prepared_)){
 
         // Get the value and check that it existed
         settings.Get(&this->sequence_prepared_);
-
     }
 
     if(settings.Contains(this->sequence_exposure_)){
 
         // Get the value and check that it existed
         settings.Get(&this->sequence_exposure_);
-
     }
 
     if(settings.Contains(this->sequence_period_)){
 
         // Get the value and check that it existed
         settings.Get(&this->sequence_period_);
-
     }
 
     if(settings.Contains(this->trigger_in_1_delay_)){
@@ -596,9 +587,7 @@ ReturnCode LCr4500::Setup(const dlp::Parameters &settings){
         // Send command and check if it succeeded
         if(DLPC350_SetTrigIn1Delay(this->trigger_in_1_delay_.Get()) == -1 )
             return ret.AddError(LCR4500_SETUP_TRIGGER_INPUT_1_DELAY_FAILED);
-
     }
-
 
     if(   settings.Contains(this->trigger_out_1_invert_)
        || settings.Contains(this->trigger_out_1_rising_)
@@ -619,7 +608,6 @@ ReturnCode LCr4500::Setup(const dlp::Parameters &settings){
                                      this->trigger_out_1_falling_.Get()) == -1 )
             return ret.AddError(LCR4500_SETUP_TRIGGER_OUTPUT_1_FAILED);
     }
-
 
     if(   settings.Contains(this->trigger_out_2_invert_)
        || settings.Contains(this->trigger_out_2_rising_)){
@@ -770,7 +758,6 @@ ReturnCode LCr4500::ProjectSolidBlackPattern(){
         return ret.AddError(LCR4500_FIRMWARE_UPLOAD_IN_PROGRESS);
     }
 
-
     // Check that LCr4500 is connected
     if(this->isConnected()){
         dlp::Pattern::Sequence sequence;
@@ -829,7 +816,6 @@ ReturnCode LCr4500::PatternSettingsValid(dlp::Pattern &arg_pattern){
 
     unsigned int exposure   = arg_pattern.exposure;
     unsigned int period     = arg_pattern.period;
-
 
     // Check that exposure time is equal to period time or at meets delta requirement
     if((exposure == period) ||
@@ -988,7 +974,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
     Parameters::PatternImageIndex flash_image_previous;
 
     dlp::Pattern      temp_pattern;
-
 
     // If A firmware upload is in progress return error
     if(this->FirmwareUploadInProgress()){
@@ -1186,7 +1171,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
             pattern_entry_green.trigger_type = LCr4500::Pattern::TriggerSource::NONE;
             pattern_entry_blue.trigger_type  = LCr4500::Pattern::TriggerSource::NONE;
 
-
             // Determine bit depth. SDK only enables equal color channel bitdepths for RGB
             pattern_entry_red.bit_depth     = DlpPatternBitdepthToLCr4500Bitdepth(temp_pattern.bitdepth);
             pattern_entry_green.bit_depth   = pattern_entry_red.bit_depth;
@@ -1205,7 +1189,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
             pattern_entry_green.invert_pattern  = pattern_entry_red.invert_pattern;
             pattern_entry_blue.invert_pattern   = pattern_entry_red.invert_pattern;
 
-
             // Determine pattern number
             Parameters::PatternNumberRed   pattern_number_red;
             Parameters::PatternNumberGreen pattern_number_green;
@@ -1219,7 +1202,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
 
             temp_pattern.parameters.Get(&pattern_number_blue);
             pattern_entry_blue.pattern_number = pattern_number_blue.Get();
-
 
             // Determine buffer swap by if the image changed or not
             Parameters::PatternImageIndexRed   flash_image_red;
@@ -1253,7 +1235,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
             // Check that pattern image is valid
             if(flash_image_green.Get() >= LCr4500::IMAGE_LUT_SIZE )
                 return ret.AddError(LCR4500_FLASH_IMAGE_INDEX_INVALID);
-
 
             // Does this pattern have the same image as the previous one?
             // No need to check if first pattern because red portion already
@@ -1312,7 +1293,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
                 pattern_entry_green.insert_black    = false;
                 pattern_entry_blue.insert_black     = false;
             }
-
 
             // If using external trigger and NOT the first pattern, set the
             // previous pattern to clear the DMD after its exposure
@@ -1484,7 +1464,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
     if(DLPC350_StartPatLutValidate() < 0)
         return ret.AddError(LCR4500_PATTERN_SEQUENCE_VALIDATION_FAILED);
 
-
     dlp::Time::Sleep::Milliseconds(100);
 
     bool dlpc350_ready = false;
@@ -1494,7 +1473,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
         if(DLPC350_CheckPatLutValidate(&dlpc350_ready,&sequence_validation) < 0)
             return ret.AddError(LCR4500_PATTERN_SEQUENCE_VALIDATION_FAILED);
     }
-
 
     // Display validation data if there was an error
     if( sequence_validation != 0 ){
@@ -1529,7 +1507,6 @@ ReturnCode LCr4500::CreateSendStartSequenceLut(const dlp::Pattern::Sequence &arg
         return ret;
     }
 
-
     dlp::Time::Sleep::Milliseconds(10);
     this->debug_.Msg("Start pattern sequence...");
     if( DLPC350_PatternDisplay(Pattern::DisplayControl::START) < 0)
@@ -1559,7 +1536,6 @@ ReturnCode LCr4500::PreparePatternSequence(const dlp::Pattern::Sequence &pattern
 
     dlp::Pattern::DataType sequence_type = dlp::Pattern::DataType::INVALID;
 
-
     // If A firmware upload is in progress, do NOT send any commands until upload is complete! return error
     if(this->FirmwareUploadInProgress()){
         this->debug_.Msg("Cannot connect because firmware is uploading");
@@ -1584,7 +1560,6 @@ ReturnCode LCr4500::PreparePatternSequence(const dlp::Pattern::Sequence &pattern
     // Check that all pattern types are equal
     if(!pattern_sequence.EqualDataTypes())
         return ret.AddError(PATTERN_SEQUENCE_PATTERN_TYPES_NOT_EQUAL);
-
 
     // Get the sequence type from the first pattern
     dlp::Pattern      temp_pattern;
@@ -1685,7 +1660,6 @@ ReturnCode LCr4500::StartPatternSequence(const unsigned int &start, const unsign
     if((start    != this->previous_sequence_start_)    ||
        (patterns != this->previous_sequence_patterns_) ||
        (repeat   != this->previous_sequence_repeat_)){
-
 
         // Create the sequence
         dlp::Pattern::Sequence sequence;
@@ -1878,7 +1852,6 @@ ReturnCode LCr4500::UploadFirmware(std::string firmware_filename){
         while(this->firmware_upload_in_progress.test_and_set()){};
     }
 
-
     this->pattern_sequence_prepared_     = false;
 
     this->firmware_upload_restart_needed = false;
@@ -1892,9 +1865,6 @@ ReturnCode LCr4500::UploadFirmware(std::string firmware_filename){
         return ret.AddError(LCR4500_FIRMWARE_FILE_NOT_FOUND);
     }
     this->firmwarePath = firmware_filename;
-
-
-
 
     // Check that the flash parameters file exists
     this->debug_.Msg("Checking that flash parameters file "+ flash_parameters_filename +" exists...");
@@ -1936,7 +1906,6 @@ ReturnCode LCr4500::UploadFirmware(std::string firmware_filename){
         this->firmware_upload_restart_needed    = false;
         return ret.AddError(LCR4500_NOT_CONNECTED);
     }
-
 
     // Enter programming mode
     this->debug_.Msg("Putting device in programming mode...");
@@ -2286,7 +2255,6 @@ int LCr4500::GetSectorNum(unsigned int Addr)
 ReturnCode LCr4500::CreateFirmware(const std::string &new_firmware_filename, const std::vector<std::string> &image_filenames){
     ReturnCode ret;
 
-
     int i = 0;
     int frwm_ret = 0;
     int count = 0;
@@ -2307,7 +2275,6 @@ ReturnCode LCr4500::CreateFirmware(const std::string &new_firmware_filename, con
         return ret.AddError(LCR4500_FIRMWARE_UPLOAD_IN_PROGRESS);
     }
 
-
     // Check that original DLPC350 firmware file exists
     if(!dlp::File::Exists(this->dlpc350_firmware_.Get())) {
         this->debug_.Msg( "ERROR: Ensure DLPC350 firmware is installed; download link http://www.ti.com/tool/dlpr350");
@@ -2326,12 +2293,10 @@ ReturnCode LCr4500::CreateFirmware(const std::string &new_firmware_filename, con
     if (pByteArray == nullptr)
         return ret.AddError(LCR4500_FIRMWARE_MEMORY_ALLOCATION_FAILED);
 
-
     // Read the firmware into memory
     std::ifstream firmware_orig(this->dlpc350_firmware_.Get(), std::ifstream::binary);
     firmware_orig.read((char *)pByteArray, dataLen);
     firmware_orig.close();
-
 
     // Read the firmware into firmware api
     frwm_ret = DLPC350_Frmw_CopyAndVerifyImage(pByteArray, dataLen);
@@ -2358,18 +2323,15 @@ ReturnCode LCr4500::CreateFirmware(const std::string &new_firmware_filename, con
     //if ((DLPC350_Frmw_GetVersionNumber() & 0xFFFFFF) < RELEASE_FW_VERSION)
     //    this->debug_.Msg( "WARNING: Old version of Firmware detected. Download the latest release from http://www.ti.com/tool/dlpr350.");
 
-
     firmwarePath = new_firmware_filename;
 
     // Initialize the firmware image buffer
     count = (int)image_filenames.size();
     DLPC350_Frmw_SPLASH_InitBuffer(count);
 
-
     // Create a log file to document firmware build process
     std::fstream log_file_out;
     log_file_out.open("Frmw-build.log", std::fstream::out);
-
 
     // Start to build firmware
     log_file_out << "Building Images from specified BMPs\n\n";
@@ -2509,7 +2471,6 @@ ReturnCode LCr4500::GetImageLoadTime(const unsigned int &index, const unsigned i
         return ret.AddError(LCR4500_NOT_CONNECTED);
     }
 
-
     // Reset the return value
     (*max_microseconds) = 0;
 
@@ -2596,7 +2557,6 @@ ReturnCode LCr4500::CreateFirmwareImages(const dlp::Pattern::Sequence  &arg_patt
     int             temp_pixel      = 0;
     int             fw_pixel        = 0;
 
-
     // Check that image filename base is NOT empty
     this->debug_.Msg("Check that the image filename base is NOT empty...");
     if(arg_image_filename_base.empty())
@@ -2609,12 +2569,10 @@ ReturnCode LCr4500::CreateFirmwareImages(const dlp::Pattern::Sequence  &arg_patt
     if(arg_pattern_sequence.GetCount() <= 0 )
         return ret.AddError(PATTERN_SEQUENCE_EMPTY);
 
-
     // Check that sequence patterns all have same type
     if(!arg_pattern_sequence.EqualDataTypes())
         return ret.AddError(PATTERN_SEQUENCE_PATTERN_TYPES_NOT_EQUAL);
     this->debug_.Msg("Sequence has equal pattern types");
-
 
     // Get the first pattern
     arg_pattern_sequence.Get(0,&temp_pattern);
@@ -2625,11 +2583,9 @@ ReturnCode LCr4500::CreateFirmwareImages(const dlp::Pattern::Sequence  &arg_patt
         return ret.AddError(PATTERN_DATA_TYPE_INVALID);
     this->debug_.Msg("Pattern Type correct");
 
-
     // Copy the pattern sequence
     dlp::Pattern::Sequence check_sequence;
     check_sequence.Add(arg_pattern_sequence);
-
 
     // Clean the return sequence
     this->debug_.Msg("Clearing return sequence and image file list");
@@ -2820,8 +2776,6 @@ ReturnCode LCr4500::CreateFirmwareImages(const dlp::Pattern::Sequence  &arg_patt
 
                 // Increment the image bit position so this pattern image is NOT overwritten
                 image_bit_position = image_bit_position + pattern_bpp;
-
-
             }
             else{
                 // Pattern is RGB
@@ -2832,8 +2786,6 @@ ReturnCode LCr4500::CreateFirmwareImages(const dlp::Pattern::Sequence  &arg_patt
                 if((temp_image_format != dlp::Image::Format::RGB_UCHAR) &&
                         (!this->sequence_prepared_.Get()))
                     return ret.AddError(LCR4500_IMAGE_FORMAT_INVALID);
-
-
 
                 // Add the red channel
 
@@ -3106,7 +3058,6 @@ ReturnCode LCr4500::CreateFirmwareImages(const dlp::Pattern::Sequence  &arg_patt
         ret_pattern_sequence.Add(temp_pattern);
     }
 
-
     // Save the image to a file if sequence has NOT been prepared
     if(!this->sequence_prepared_.Get()){
         // Create the firmware image filename
@@ -3220,12 +3171,11 @@ ReturnCode LCr4500::SavePatternIntImageAsRGBfile(Image &image_int, const std::st
     return ret;
 }
 
-
-
 namespace String{
 
 template <> dlp::LCr4500::ImageCompression ToNumber(const std::string &text, unsigned int base ){
     // Ignore base variable
+    (void)base; // Remove unused variable warning
     if (text.compare("NONE") == 0)      return dlp::LCr4500::ImageCompression::NONE;
     if (text.compare("RLE") == 0)       return dlp::LCr4500::ImageCompression::RLE;
     if (text.compare("FOUR_LINE") == 0) return dlp::LCr4500::ImageCompression::FOUR_LINE;
@@ -3234,73 +3184,96 @@ template <> dlp::LCr4500::ImageCompression ToNumber(const std::string &text, uns
 }
 
 template <> dlp::LCr4500::PowerStandbyMode::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::PowerStandbyMode::Enum)dlp::String::ToNumber<int>(text);
 }
 
 template <> dlp::LCr4500::ImageFlip::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::ImageFlip::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Video::InputSource::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Video::InputSource::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Video::ParallelPortWidth::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Video::ParallelPortWidth::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Video::ParallelClockPort::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Video::ParallelClockPort::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Video::DataSwap::SubChannels::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Video::DataSwap::SubChannels::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Video::DataSwap::Port::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Video::DataSwap::Port::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Video::TestPattern::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Video::TestPattern::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::OperatingMode::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::OperatingMode::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::InvertData::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::InvertData::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Source::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Source::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::TriggerMode::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::TriggerMode::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::TriggerSource::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::TriggerSource::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Led::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Led::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Bitdepth::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Bitdepth::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Number::Mono_1BPP::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Number::Mono_1BPP::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Number::Mono_2BPP::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Number::Mono_2BPP::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Number::Mono_3BPP::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Number::Mono_3BPP::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Number::Mono_4BPP::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Number::Mono_4BPP::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Number::Mono_5BPP::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Number::Mono_5BPP::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Number::Mono_6BPP::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Number::Mono_6BPP::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Number::Mono_7BPP::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Number::Mono_7BPP::Enum)dlp::String::ToNumber<int>(text);
 }
 template <> dlp::LCr4500::Pattern::Number::Mono_8BPP::Enum ToNumber( const std::string &text, unsigned int base ){
+    (void)base; // Remove unused variable warning
     return (dlp::LCr4500::Pattern::Number::Mono_8BPP::Enum)dlp::String::ToNumber<int>(text);
 }
 }

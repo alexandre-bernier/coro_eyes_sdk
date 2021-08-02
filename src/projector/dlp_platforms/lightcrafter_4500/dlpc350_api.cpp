@@ -544,13 +544,13 @@ int DLPC350_SetLedEnables(bool SeqCtrl, bool Red, bool Green, bool Blue)
  * (I2C: 0x10)
  * (USB: CMD2: 0x1A, CMD3: 0x07)
  *
- * @param   pSeqCtrl  - I - 1 - All LED enables are controlled by the Sequencer and ignore the other LED enable settings.
+ * @param   SeqCtrl  - I - 1 - All LED enables are controlled by the Sequencer and ignore the other LED enable settings.
  *                          0 - All LED enables are controlled by pRed, pGreen and pBlue seetings and ignore Sequencer control
- * @param   pRed  - I - 0 - Red LED is disabled
+ * @param   Red  - I - 0 - Red LED is disabled
  *                      1 - Red LED is enabled
- * @param   pGreen  - I - 0 - Green LED is disabled
+ * @param   Green  - I - 0 - Green LED is disabled
  *                      1 - Green LED is enabled
- * @param   pBlue  - I - 0 - Blue LED is disabled
+ * @param   Blue  - I - 0 - Blue LED is disabled
  *                      1 - Blue LED is enabled]
  *
  * @return  0 = PASS    <BR>
@@ -1216,7 +1216,7 @@ int DLPC350_GetMode(bool *pMode)
  * video mode or bypasses them for pattern display mode. This command selects between video or pattern
  * display mode of operation.
  *
- * @param   SLmode  - O - TRUE = Pattern Display mode. Assumes a 1-bit through 8-bit image with a pixel
+ * @param   pMode  - O - TRUE = Pattern Display mode. Assumes a 1-bit through 8-bit image with a pixel
  *                              resolution of 912 x 1140 and bypasses all the image processing functions of DLPC350
  *                        FALSE = Video Display mode. Assumes streaming video image from the 30-bit
  *                              RGB or FPD-link interface with a pixel resolution of up to 1280 x 800 up to 120 Hz.
@@ -1888,16 +1888,16 @@ int DLPC350_GetFPD_Mode_Field(unsigned int *pPixelMappingMode, bool *pSwapPolari
  * (USB: CMD2: 0x1A, CMD3: 0x04)
  * This command reads back the configuration of FPD-link pixel map, polarity, and signal select.
  *
- * @param   PixelMappingMode  - O - FPD-link Pixel Mapping Mode: See table 2-21 in programmer's guide for more details
+ * @param   pPixelMappingMode  - O - FPD-link Pixel Mapping Mode: See table 2-21 in programmer's guide for more details
  *                                  0 = Mode 1
  *                                  1 = Mode 2
  *                                  2 = Mode 3
  *                                  3 = Mode 4
- * @param   SwapPolarity - O - Polarity select
+ * @param   pSwapPolarity - O - Polarity select
  *                             true = swap polarity
  *                             false = do not swap polarity
  *
- * @param   FieldSignalSelect - O -  Field Signal Select
+ * @param   pFieldSignalSelect - O -  Field Signal Select
  *                              0 - Map FPD-Link output from CONT1 onto Field Signal for FPD-link interface port
  *                              1 - Map FPD-Link output from CONT2 onto Field Signal for FPD-link interface port
  *                              2 - Force 0 onto Field Signal for FPD-link interface port
@@ -1967,7 +1967,7 @@ int DLPC350_GetTPGSelect(unsigned int *pPattern)
  * (USB: CMD2: 0x12, CMD3: 0x03)
  * This command reads back the selected internal test pattern.
  *
- * @param   pattern  - O - Selected internal test pattern:
+ * @param   pPattern  - O - Selected internal test pattern:
  *                         0x0 = Solid Field
  *                         0x1 = Horizontal Ramp
  *                         0x2 = Vertical Ramp
@@ -3370,11 +3370,11 @@ int DLPC350_GetVarExpPatternConfig(unsigned int *pNumLutEntries, unsigned int *p
  * Before using this API, stop the current pattern sequence using DLPC350_PatternDisplay() API
  * After calling this API, send the Validation command using the API DLPC350_ValidatePatLutData() before starting the pattern sequence
  *
- * @param   numLutEntries - I - Number of LUT entries
- * @param   repeat - I - 0 = execute the pattern sequence once; 1 = repeat the pattern sequnce.
- * @param   numPatsForTrigOut2 - I - Number of patterns to display(range 1 through 256).
+ * @param   pNumLutEntries - I - Number of LUT entries
+ * @param   pRepeat - I - 0 = execute the pattern sequence once; 1 = repeat the pattern sequnce.
+ * @param   pNumPatsForTrigOut2 - I - Number of patterns to display(range 1 through 256).
  *                                   If in repeat mode, then this value dictates how often TRIG_OUT_2 is generated.
- * @param   numImages - I - Number of Image Index LUT Entries(range 1 through 64).
+ * @param   pNumImages - I - Number of Image Index LUT Entries(range 1 through 64).
  *                          This Field is irrelevant for Pattern Display Data Input Source set to a value other than internal.
  *
  * @return  >=0 = PASS    <BR>
@@ -3472,8 +3472,8 @@ int DLPC350_GetExposure_FramePeriod(unsigned int *pExposure, unsigned int *pFram
  * (USB: CMD2: 0x1A, CMD3: 0x29)
  * This API reads back the exposure time and frame period settings from the controller.
  *
- * @param   exposurePeriod - O - Exposure time in microseconds.
- * @param   framePeriod - O - Frame period in microseconds.
+ * @param   pExposure - O - Exposure time in microseconds.
+ * @param   pFramePeriod - O - Frame period in microseconds.
  *
  * @return  0 = PASS    <BR>
  *          -1 = FAIL  <BR>
@@ -4315,7 +4315,7 @@ int DLPC350_GetLEDPWMInvert(bool *inverted)
  *
  * This API reads the polarity of all LED PWM signals.
  *
- * @param   invert - O - 0 = Normal polarity, PWM 0 value corresponds to no current while PWM 255 value corresponds to maximum current
+ * @param   inverted - O - 0 = Normal polarity, PWM 0 value corresponds to no current while PWM 255 value corresponds to maximum current
  *                       1 = Inverted polarity. PWM 0 value corresponds to maximum current while PWM 255 value corresponds to no current.
  *
  * @return  >=0 = PASS    <BR>
@@ -4449,11 +4449,11 @@ int  DLPC350_I2C0WriteData(bool is7Bit, unsigned int sclClk, unsigned int devAdd
   *
   * @param   sclClk - I - I2C master clock setting 18194 to 400000
   *
-  * @param   devAddress - I - I2C slave device address to which message to be sent.
+  * @param   devAddr - I - I2C slave device address to which message to be sent.
   *
   * @param   numWriteBytes  - I - Number of data bytes to be sent in write transcation
   *
-  * @param   *pWdata - I - pointer to data bytes array to be sent
+  * @param   *pWData - I - pointer to data bytes array to be sent
   *
   *
   * @return  >=0 = PASS    <BR>
@@ -4500,13 +4500,13 @@ int  DLPC350_I2C0ReadData(bool is7Bit, unsigned int sclClk, unsigned int devAddr
   *
   * @param   sclClk - I - I2C master clock setting 18194 to 400000
   *
-  * @param   devAddress - I - I2C slave device address to which message to be sent.
+  * @param   devAddr - I - I2C slave device address to which message to be sent.
   *
   * @param   numWriteBytes  - I - Number of data bytes to be sent as part of write before reading the response
   *
   * @param   numReadBytes  - I - Number of data bytes to be read as part of read transcation
   *
-  * @param   *pWdata - I - pointer to data bytes array to be sent
+  * @param   *pWData - I - pointer to data bytes array to be sent
   *
   * @param   *pRdata - I - pointer to data bytes array where the response is copied
   *
@@ -4619,7 +4619,7 @@ int  DLPC350_I2C0TranStat(unsigned char *pStat)
 /**
   * This API returns I2C0 Master write transcation status on I2C0 port of DLPC350.
   *
-  * @param   *pStats - I - pointer to the status
+  * @param   *pStat - I - pointer to the status
   *                        0x00 - NO Error occured
   *                        0x01 - NO ACK Received from slave
   *                        0x02 - Arbitration lost

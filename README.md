@@ -9,3 +9,15 @@ SDK for a structured light 3D vision system using the TI LightCrafter 4500 EVM a
 - [OpenCV4](https://opencv.org/)
 
 		sudo apt install libopencv-dev
+
+- [hidapi](https://github.com/libusb/hidapi)
+
+		sudo apt install libhidapi-dev
+
+- [libusb-1.0](https://libusb.info/)
+
+		sudo apt install libusb-1.0-0-dev
+
+- [libudev](https://manpages.debian.org/testing/libudev-dev/libudev.3.en.html)
+
+		sudo apt install libudev-dev
