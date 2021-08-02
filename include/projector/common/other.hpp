@@ -224,16 +224,6 @@ namespace Number{
 
 }
 
-class GLFW_Library{
-public:
-    static bool Init();
-    static void Terminate();
-    static unsigned int GetMonitorCount();
-
-private:
-    static unsigned int open_connections_;
-};
-
 }
 
 #endif // DLP_SDK_OTHER_HPP

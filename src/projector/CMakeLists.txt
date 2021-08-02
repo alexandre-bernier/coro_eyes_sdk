@@ -1,9 +1,17 @@
 # Source files
 set(PROJECTOR_INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/projector
-    ${PROJECT_SOURCE_DIR}/include/projector/dlp_platforms)
+    CACHE INTERNAL "")
 
 set(PROJECTOR_SRC
+    common/debug.cpp
+    common/module.cpp
+    common/other.cpp
+    common/parameters.cpp
+    common/returncode.cpp
+    common/image/image.cpp
+    common/pattern/pattern.cpp
+    common/pattern/pattern_sequence.cpp
     dlp_platforms/dlp_platform.cpp
     dlp_platforms/lightcrafter_4500/common.cpp
     dlp_platforms/lightcrafter_4500/dlpc350_api.cpp
@@ -29,6 +37,6 @@ endif()
 list(APPEND PROJECTOR_INCLUDE_DIRS ${HIDAPI_INCLUDE_DIRS})
 
 # Build
-add_library(projector_api ${PROJECTOR_SRC})
-target_include_directories(projector_api PUBLIC ${PROJECTOR_INCLUDE_DIRS})
-target_link_libraries(projector_api ${OpenCV_LIBS} ${HIDAPI_LIBS})
+add_library(projector ${PROJECTOR_SRC})
+target_include_directories(projector PUBLIC ${PROJECTOR_INCLUDE_DIRS})
+target_link_libraries(projector ${OpenCV_LIBS} ${HIDAPI_LIBS})
