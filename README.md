@@ -21,3 +21,8 @@ SDK for a structured light 3D vision system using the TI LightCrafter 4500 EVM a
 - [libudev](https://manpages.debian.org/testing/libudev-dev/libudev.3.en.html)
 
 		sudo apt install libudev-dev
+
+### udev
+Once udev is installed, you can run the [udev installation script](install/install_udev_rule.sh) with sudo to create the udev rules automatically.
+
+		sudo ./install_udev_rule.sh
