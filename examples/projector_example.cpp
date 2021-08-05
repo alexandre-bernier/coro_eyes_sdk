@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void print_errors(dlp::ReturnCode err)
+void print_dlp_errors(dlp::ReturnCode err)
 {
     unsigned int i;
     if(err.hasErrors()) {
@@ -33,7 +33,7 @@ int main(void)
     // Connect projector
     cout << "Connecting..." << endl;
     ret = proj.Connect("");
-    print_errors(ret);
+    print_dlp_errors(ret);
     if(ret.hasErrors()) {
         cout << "Aborting..." << endl;
         return -1;
@@ -42,15 +42,16 @@ int main(void)
     // Load parameter file
     cout << "Loading parameters..." << endl;
     ret = param.Load(proj_param_file);
-    print_errors(ret);
+    print_dlp_errors(ret);
     if(ret.hasErrors()) {
         cout << "Aborting..." << endl;
         return -1;
     }
 
     // Setup projector
+    cout << "Setting up projector..." << endl;
     ret = proj.Setup(param);
-    print_errors(ret);
+    print_dlp_errors(ret);
     if(ret.hasErrors()) {
         cout << "Aborting..." << endl;
         return -1;
@@ -58,18 +59,18 @@ int main(void)
 
     // Project white pattern
     cout << "Projecting white..." << endl;
-    print_errors(proj.ProjectSolidWhitePattern());
+    print_dlp_errors(proj.ProjectSolidWhitePattern());
 
     // Wait
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
     // Project black pattern
-    cout << "Projecting black..." << endl;
-    print_errors(proj.ProjectSolidBlackPattern());
+    cout << "Stopping projection..." << endl;
+    print_dlp_errors(proj.StopPatternSequence());
 
     // Disconnect projector
     cout << "Disconnecting..." << endl;
-    print_errors(proj.Disconnect());
+    print_dlp_errors(proj.Disconnect());
 
     return 0;
 }
