@@ -1,23 +1,24 @@
 # Source files
 set(PROJECTOR_INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/include/projector
+    ${PROJECT_SOURCE_DIR}/include/projector/dlp
     CACHE INTERNAL "")
 
 set(PROJECTOR_SRC
-    common/debug.cpp
-    common/module.cpp
-    common/other.cpp
-    common/parameters.cpp
-    common/returncode.cpp
-    common/image/image.cpp
-    common/pattern/pattern.cpp
-    common/pattern/pattern_sequence.cpp
-    dlp_platforms/dlp_platform.cpp
-    dlp_platforms/lightcrafter_4500/common.cpp
-    dlp_platforms/lightcrafter_4500/dlpc350_api.cpp
-    dlp_platforms/lightcrafter_4500/dlpc350_firmware.cpp
-    dlp_platforms/lightcrafter_4500/dlpc350_usb.cpp
-    dlp_platforms/lightcrafter_4500/lcr4500.cpp)
+    dlp/common/debug.cpp
+    dlp/common/module.cpp
+    dlp/common/other.cpp
+    dlp/common/parameters.cpp
+    dlp/common/returncode.cpp
+    dlp/common/image/image.cpp
+    dlp/common/pattern/pattern.cpp
+    dlp/common/pattern/pattern_sequence.cpp
+    dlp/dlp_platforms/dlp_platform.cpp
+    dlp/dlp_platforms/lightcrafter_4500/common.cpp
+    dlp/dlp_platforms/lightcrafter_4500/dlpc350_api.cpp
+    dlp/dlp_platforms/lightcrafter_4500/dlpc350_firmware.cpp
+    dlp/dlp_platforms/lightcrafter_4500/dlpc350_usb.cpp
+    dlp/dlp_platforms/lightcrafter_4500/lcr4500.cpp)
 
 # Dependencies
 ## OpenCV
