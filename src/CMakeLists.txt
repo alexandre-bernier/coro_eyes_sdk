@@ -11,9 +11,12 @@ add_subdirectory(projector)
 
 # Libraries include dir and libs
 set(CORO_EYES_SDK_INCLUDE_DIRS
-    ${PROJECTOR_INCLUDE_DIRS})
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECTOR_INCLUDE_DIRS}
+    CACHE INTERNAL "")
 set(CORO_EYES_SDK_LIBS
-    projector)
+    projector
+    CACHE INTERNAL "")
 
 # Build SDK
 add_library(CORO_EYES_SDK projector)
