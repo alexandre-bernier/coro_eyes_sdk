@@ -9,10 +9,14 @@ link_directories(${OpenCV_LIBRARY_DIRS})
 add_subdirectory(camera)
 add_subdirectory(projector)
 
-# SDK variables
+# Libraries include dir and libs
 set(CORO_EYES_SDK_INCLUDE_DIRS
-    ${PROJECTOR_INCLUDE_DIRS}
-    CACHE INTERNAL "")
+    ${PROJECTOR_INCLUDE_DIRS})
 set(CORO_EYES_SDK_LIBS
-    projector
-    CACHE INTERNAL "")
+    projector)
+
+# Build SDK
+add_library(CORO_EYES_SDK projector)
+add_dependencies(CORO_EYES_SDK projector)
+target_include_directories(CORO_EYES_SDK PUBLIC ${CORO_EYES_SDK_INCLUDE_DIRS})
+target_link_libraries(CORO_EYES_SDK ${CORO_EYES_SDK_LIBS})
