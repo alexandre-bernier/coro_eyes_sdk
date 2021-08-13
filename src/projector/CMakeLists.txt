@@ -18,7 +18,8 @@ set(PROJECTOR_SRC
     dlp/dlp_platforms/lightcrafter_4500/dlpc350_api.cpp
     dlp/dlp_platforms/lightcrafter_4500/dlpc350_firmware.cpp
     dlp/dlp_platforms/lightcrafter_4500/dlpc350_usb.cpp
-    dlp/dlp_platforms/lightcrafter_4500/lcr4500.cpp)
+    dlp/dlp_platforms/lightcrafter_4500/lcr4500.cpp
+    structured_light_patterns.cpp)
 
 # Dependencies
 ## OpenCV
