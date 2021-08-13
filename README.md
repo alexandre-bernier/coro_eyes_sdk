@@ -61,3 +61,9 @@ Simply include coro_eyes_sdk.h in your code to get access to all the APIs.
 ### Library
 
 You will need to build coro_eyes_sdk library and link it in your project.
+
+## Examples
+
+You can find multiple examples on how to use this SDK in the examples/ directory:
+
+- examples/projector_example.cpp

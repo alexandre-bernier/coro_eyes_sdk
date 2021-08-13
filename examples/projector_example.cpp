@@ -180,7 +180,7 @@ int main(void)
      * @snippet projector_example.cpp Visualize patterns
      */
     // [Visualize patterns]
-//    patterns.visualize_patterns();
+    patterns.visualize_patterns();
     // [Visualize patterns]
 
     /**
