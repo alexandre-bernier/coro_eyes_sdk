@@ -1,6 +1,6 @@
 /** @file structured_light_patterns.cpp
  *  @brief Utility class to generate structured light patterns.
- *  @copyright 2021 Alexandre Bernier
+ *  @copyright BSD-3-Clause License
  */
 
 #include "structured_light_patterns.h"

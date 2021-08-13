@@ -1,6 +1,6 @@
 /** @file projector.h
  *  @brief Main header for the projector api.
- *  @copyright 2021 Alexandre Bernier
+ *  @copyright BSD-3-Clause License
  */
 #ifndef _PROJECTOR_H
 #define _PROJECTOR_H

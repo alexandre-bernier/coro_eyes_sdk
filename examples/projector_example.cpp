@@ -1,6 +1,6 @@
 /** @file projector_example.cpp
  *  @brief Example showing how to use the projector api.
- *  @copyright 2021 Alexandre Bernier
+ *  @copyright BSD-3-Clause License
  *  @example projector_example.cpp
  */
 

@@ -1,6 +1,6 @@
 /** @file structured_light_patterns.h
  *  @brief Utility class to generate structured light patterns.
- *  @copyright 2021 Alexandre Bernier
+ *  @copyright BSD-3-Clause License
  */
 #ifndef _STRUCTURED_LIGHT_PATTERNS_H
 #define _STRUCTURED_LIGHT_PATTERNS_H
