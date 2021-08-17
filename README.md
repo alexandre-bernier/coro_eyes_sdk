@@ -46,6 +46,11 @@ The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following versions of
 
       sudo apt install libudev-dev
     
+- [FlyCapture SDK](https://www.flir.ca/products/flycapture-sdk/)<br />
+    [<b>Download here</b>](https://flir.app.boxcn.net/v/Flycapture2SDK/folder/72274730742).
+    The version for Ubuntu 18.04 works on Ubuntu 20.04.<br />
+    Follow instructions [<b>here</b>](https://www.flir.ca/support-center/iis/machine-vision/application-note/getting-started-with-flycapture-2.x-and-linux/).
+    
 ## Usage
 
 ### udev

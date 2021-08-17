@@ -6,7 +6,7 @@
 #ifndef _CORO_EYES_SDK_H
 #define _CORO_EYES_SDK_H
 
+#include "camera.h"
 #include "projector.h"
-
 
 #endif // _CORO_EYES_SDK_H
