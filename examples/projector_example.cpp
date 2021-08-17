@@ -4,7 +4,7 @@
  *  @example projector_example.cpp
  */
 
-#include <stdio.h>
+#include <iostream>
 #include <thread>
 #include <chrono>
 #include "coro_eyes_sdk.h"
