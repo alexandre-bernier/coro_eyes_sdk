@@ -13,7 +13,7 @@ using namespace std;
 
 /**
  * @brief Prints errors and warnings if there is any.
- * @param dlp::ReturnCode
+ * @param err The dlp::ReturnCode to print
  */
 void print_dlp_errors(dlp::ReturnCode err)
 {
@@ -34,7 +34,7 @@ void print_dlp_errors(dlp::ReturnCode err)
 /**
  * @brief Prints the firmware upload progress.
  * @details Needs to be called in a separate thread before starting the firmware upload.
- * @param dlp::LCr4500
+ * @param projector Pointer to a dlp::LCr4500 projector
  */
 void print_firmware_upload_progress(dlp::LCr4500 *projector)
 {
