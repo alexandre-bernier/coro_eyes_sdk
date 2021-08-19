@@ -12,7 +12,7 @@
 class StructuredLightPatterns
 {
 public:
-    StructuredLightPatterns(unsigned int proj_width = 912, unsigned int proj_height = 1140);
+    StructuredLightPatterns(unsigned int proj_height = 1140, unsigned int proj_width = 912);
     ~StructuredLightPatterns();
 
     void generate_gray_code_patterns();
@@ -42,8 +42,8 @@ private:
 
     dlp::Pattern::Sequence _dlp_pattern_sequence;
 
-    unsigned int width = 0;
     unsigned int height = 0;
+    unsigned int width = 0;
 
     void _convert_cv_patterns_to_dlp();
 };

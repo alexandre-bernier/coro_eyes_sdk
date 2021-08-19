@@ -6,9 +6,9 @@
 #include "structured_light_patterns.h"
 #include <opencv2/highgui.hpp>
 
-StructuredLightPatterns::StructuredLightPatterns(unsigned int proj_width, unsigned int proj_height) :
-    width(proj_width),
-    height(proj_height)
+StructuredLightPatterns::StructuredLightPatterns(unsigned int proj_height, unsigned int proj_width) :
+    height(proj_height),
+    width(proj_width)
 {
     // Create sinusoidal patterns parameter structure
     cv::structured_light::SinusoidalPattern::Params params;

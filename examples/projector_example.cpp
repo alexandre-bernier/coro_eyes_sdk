@@ -207,15 +207,15 @@ int main(void)
 
     cout << "Generating patterns..." << endl;
 
-    unsigned int proj_width;
-
-    projector.GetColumns(&proj_width);
-
     unsigned int proj_height;
 
     projector.GetRows(&proj_height);
 
-    StructuredLightPatterns patterns(proj_width, proj_height);
+    unsigned int proj_width;
+
+    projector.GetColumns(&proj_width);
+
+    StructuredLightPatterns patterns(proj_height, proj_width);
 
     patterns.generate_gray_code_patterns();
 
