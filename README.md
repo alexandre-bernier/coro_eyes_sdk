@@ -19,11 +19,12 @@ Maintainer: Alexandre Bernier, ab.alexandre.bernier@gmail.com</b>
 The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following versions of dependencies:
 
 | Dependencies | Version |
-| ------------ | :-----: |
+| --- | --- |
 | OpenCv | 4.2.0 |
 | hidapi | 0.9.0 |
 | libusb | 1.0.23 |
 | udev | 245.4 |
+| FlyCapture SDK | 2.13.3.31 |
 
 ## Installation
 
