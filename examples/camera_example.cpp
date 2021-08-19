@@ -229,7 +229,7 @@ int main(void)
      */
     // [Wait for user]
 
-    while(cv::waitKey(25) == -1);
+    while(cv::waitKey(1) == -1);
 
     // [Wait for user]
 
