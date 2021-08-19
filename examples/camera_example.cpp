@@ -193,13 +193,13 @@ int main(void)
 
     for(unsigned int i=0; i<num_cameras; i++) {
 
-        cv::namedWindow(frame_info[i].cv_window_name, cv::WINDOW_AUTOSIZE);
-
         frame_info[i].cv_window_name = "Camera " + std::to_string(i);
 
         frame_info[i].image_height = camera[i].get_camera_height();
 
         frame_info[i].image_width = camera[i].get_camera_width();
+
+        cv::namedWindow(frame_info[i].cv_window_name, cv::WINDOW_AUTOSIZE);
 
         camera[i].set_new_frame_callback(new_frame_callback, &frame_info[i]);
 

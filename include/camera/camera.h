@@ -49,7 +49,7 @@ public:
     int get_strobe_control(FlyCapture2::StrobeControl *strobe_control, ExceptionHandling throw_exception = ExceptionHandling::NoExceptions);
 
     // Image capture
-    void set_new_frame_callback(std::function<void (cv::Mat *, void *)> callback, void *callback_data);
+    void set_new_frame_callback(std::function<void (cv::Mat*, void*)> callback, void *callback_data);
     int start_capture();
     int stop_capture();
     cv::Mat *get_last_frame() {return &_last_frame;};
