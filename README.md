@@ -72,3 +72,4 @@ You will need to build coro_eyes_sdk library and link it in your project.
 You can find multiple examples on how to use this SDK in the examples/ directory:
 
 - examples/projector_example.cpp
+- examples/camera_example.cpp
