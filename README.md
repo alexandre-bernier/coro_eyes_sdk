@@ -16,7 +16,7 @@ Maintainer: Alexandre Bernier, ab.alexandre.bernier@gmail.com</b>
 
 ### Compatibility
 
-The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following versions of dependencies:
+The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following dependency versions:
 
 | Dependencies | Version |
 | --- | --- |
