@@ -23,7 +23,7 @@ struct FrameInfo {
  * @param frame Pointer to the last frame received in OpenCV format
  * @param callback_data Pointer to a FrameInfo
  */
-void new_frame_callback(cv::Mat *frame, void *callback_data)
+void camera_feed_callback(cv::Mat *frame, void *callback_data)
 {
     // Typecast callback data
     FrameInfo frame_info = *(FrameInfo*)callback_data;
@@ -51,6 +51,7 @@ int main(void)
 
     // [Available cameras]
 
+
     /**
      * @section guid Get the GUID for every available camera
      * @snippet camera_example.cpp GUID
@@ -72,6 +73,7 @@ int main(void)
     }
 
     // [GUID]
+
 
     /**
      * @section connect Connect to all available cameras
@@ -96,6 +98,7 @@ int main(void)
     }
 
     // [Connect]
+
 
     /**
      * @section configure Configure cameras
@@ -126,6 +129,7 @@ int main(void)
     }
 
     // [Configure]
+
 
     /**
      * @section coro_eyes_properties Set camera properties for CoRo Eyes
@@ -181,6 +185,7 @@ int main(void)
 
     // [CoRo Eyes properties]
 
+
     /**
      * @section feeds Setup camera feeds
      * @snippet camera_example.cpp Camera feeds
@@ -201,11 +206,12 @@ int main(void)
 
         cv::namedWindow(frame_info[i].cv_window_name, cv::WINDOW_AUTOSIZE);
 
-        camera[i].set_new_frame_callback(new_frame_callback, &frame_info[i]);
+        camera[i].set_new_frame_callback(camera_feed_callback, &frame_info[i]);
 
     }
 
     // [Camera feeds]
+
 
     /**
      * @section start_capture Start capturing with cameras
@@ -223,6 +229,7 @@ int main(void)
 
     // [Start capture]
 
+
     /**
      * @section wait_user Wait for the user to press a key
      * @snippet camera_example.cpp Wait for user
@@ -233,6 +240,7 @@ int main(void)
 
     // [Wait for user]
 
+
     /**
      * @section close_windows Close all windows
      * @snippet camera_example.cpp Close windows
@@ -242,6 +250,7 @@ int main(void)
     cv::destroyAllWindows();
 
     // [Close windows]
+
 
     /**
      * @section stop_captures Stop all captures
@@ -258,6 +267,7 @@ int main(void)
     }
 
     // [Stop captures]
+
 
     /**
      * @section disconnect Disconnect from all cameras

@@ -90,6 +90,7 @@ int main(void)
 
     // [Variables]
 
+
     /**
      * @section connection Connect to the projector
      * @snippet projector_example.cpp Connection
@@ -112,6 +113,7 @@ int main(void)
 
     // [Connection]
 
+
     /**
      * @section load Load the projector settings file
      * @snippet projector_example.cpp Load settings
@@ -133,6 +135,7 @@ int main(void)
     }
 
     // [Load settings]
+
 
     /**
      * @section setup Setup projector
@@ -158,6 +161,7 @@ int main(void)
 
     // [Setup]
 
+
     /**
      * @section white Project white pattern
      * @snippet projector_example.cpp Project white
@@ -171,6 +175,7 @@ int main(void)
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     // [Project white]
+
 
     /**
      * @section black Project black pattern
@@ -186,6 +191,7 @@ int main(void)
 
     // [Project black]
 
+
     /**
      * @section stop Stop projection (turn off the lamp)
      * @snippet projector_example.cpp Stop projection
@@ -197,6 +203,7 @@ int main(void)
     print_dlp_errors(projector.StopPatternSequence());
 
     // [Stop projection]
+
 
     /**
      * @section generate Generate structured light patterns
@@ -221,6 +228,7 @@ int main(void)
 
     // [Generate patterns]
 
+
     /**
      * @section visualize Visualize generated patterns
      * Press any key to see the next image.
@@ -231,6 +239,7 @@ int main(void)
     patterns.visualize_patterns();
 
     // [Visualize patterns]
+
 
     /**
      * @section param Decide if we upload generated patterns to projector
@@ -249,6 +258,7 @@ int main(void)
     projector.Setup(upload_patterns_param);
 
     // [Upload parameter]
+
 
     /**
      * @section firmware_progress Print firmware upload progress
@@ -269,6 +279,7 @@ int main(void)
 
     // [Print upload progress]
 
+
     /**
      * @section prepare Prepare patterns for the projector (DLP)
      * They will be sent to the projector if the dlp::DLP_Platform::Parameters::SequencePrepared parameter is set to false.
@@ -284,6 +295,7 @@ int main(void)
 
     // [Prepare patterns]
 
+
     /**
      * @section project_patterns Start patterns projection
      * @snippet projector_example.cpp Project patterns
@@ -295,6 +307,7 @@ int main(void)
     projector.StartPatternSequence(0, patterns.get_nb_patterns(), false);
 
     // [Project patterns]
+
 
     /**
      * @section wait Wait for projection to complete
@@ -312,6 +325,7 @@ int main(void)
 
     // [Wait for projection]
 
+
     /**
      * @section stop2 Stop projection (turn off the lamp)
      * @snippet projector_example.cpp Stop projection 2
@@ -325,6 +339,7 @@ int main(void)
     print_dlp_errors(projector.StopPatternSequence());
 
     // [Stop projection 2]
+
 
     /**
      * @section disconnect Disconnect from the projector
