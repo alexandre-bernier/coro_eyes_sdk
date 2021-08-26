@@ -4,7 +4,8 @@ set(CAMERA_INCLUDE_DIRS
     CACHE INTERNAL "")
 
 set(CAMERA_SRC
-    camera.cpp)
+    camera.cpp
+    camera_calibration.cpp)
 
 # Dependencies
 ## OpenCV
