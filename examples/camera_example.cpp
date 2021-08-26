@@ -49,6 +49,14 @@ int main(void)
 
     cout << "Number of available cameras: " << num_cameras << endl;
 
+    if(num_cameras < 1) {
+
+        cerr << "No camera connected. Stopping application..." << endl;
+
+        return -1;
+
+    }
+
     // [Available cameras]
 
 
@@ -66,7 +74,7 @@ int main(void)
 
         if(Camera::get_guid(i, &guid[i])) {
 
-            cout << "Can't get GUID of camera " << i << endl;
+            cerr << "Can't get GUID of camera " << i << endl;
 
             return -1;
         }
@@ -89,7 +97,7 @@ int main(void)
 
         if(camera[i].connect(&guid[i]) != FlyCapture2::PGRERROR_OK) {
 
-            cout << "Can't connect to camera " << i << endl;
+            cerr << "Can't connect to camera " << i << endl;
 
         }
 
@@ -112,7 +120,7 @@ int main(void)
 
         if(camera[i].configure()) {
 
-            cout << "Can't configure camera " << i << endl;
+            cerr << "Can't configure camera " << i << endl;
 
             cout << "Disconnecting from all cameras" << endl;
 
@@ -159,7 +167,7 @@ int main(void)
 
         default:
 
-            cout << "Unrecognized camera (" << camera[i].get_serial_number() << ")." << endl;
+            cerr << "Unrecognized camera (" << camera[i].get_serial_number() << ")." << endl;
 
             break;
 
@@ -167,7 +175,7 @@ int main(void)
 
         if(camera[i].set_properties_for_coro_eyes(camera_position)) {
 
-            cout << "Can't configure camera " << i << "." << endl;
+            cerr << "Can't configure camera " << i << "." << endl;
 
             cout << "Disconnecting from all cameras" << endl;
 
@@ -275,7 +283,7 @@ int main(void)
      */
     // [Disconnect]
 
-    cout << "Disconnecting from all cameras" << endl;
+    cout << "Disconnecting from all cameras..." << endl;
 
     for(unsigned int i=0; i<num_cameras; i++) {
 

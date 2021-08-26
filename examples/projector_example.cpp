@@ -20,7 +20,7 @@ void print_dlp_errors(dlp::ReturnCode err)
     unsigned int i;
     if(err.hasErrors()) {
         for(i=0; i<err.GetErrorCount(); i++) {
-            cout << "Error: " << err.GetErrors().at(i) << endl;
+            cerr << "Error: " << err.GetErrors().at(i) << endl;
         }
     }
 
@@ -105,7 +105,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Aborting..." << endl;
+        cout << "Stopping application..." << endl;
 
         return -1;
 
@@ -128,7 +128,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Aborting..." << endl;
+        cout << "Stopping application..." << endl;
 
         return -1;
 
@@ -151,7 +151,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Aborting..." << endl;
+        cout << "Stopping application..." << endl;
 
         return -1;
 

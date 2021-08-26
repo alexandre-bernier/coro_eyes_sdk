@@ -7,8 +7,8 @@
 
 #include <stdexcept>
 #include <functional>
-#include "opencv2/core.hpp"
-#include "flycapture/FlyCapture2.h"
+#include <opencv2/core.hpp>
+#include <flycapture/FlyCapture2.h>
 
 class Camera : private FlyCapture2::Camera
 {
