@@ -193,7 +193,7 @@ int Camera::configure(FlyCapture2::Format7ImageSettings *f7_image_settings, FlyC
     // Send Format7 Image Settings to the camera
     err = SetFormat7Configuration(&_f7_image_settings, (float)100.0);
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Can't set Format7 Image Settings." << std::endl;
+        std::cerr << "Can't set Format7 Image Settings." << std::endl;
         err.PrintErrorTrace();
         return err.GetType();
     }
@@ -217,7 +217,7 @@ int Camera::configure(FlyCapture2::Format7ImageSettings *f7_image_settings, FlyC
     // Send FlyCapture Configurations to the camera
     err = SetConfiguration(&_flycapture_config);
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Can't set FlyCapture Configurations." << std::endl;
+        std::cerr << "Can't set FlyCapture Configurations." << std::endl;
         err.PrintErrorTrace();
     }
 
@@ -237,7 +237,7 @@ int Camera::set_property(FlyCapture2::Property *property, ExceptionHandling thro
 
     err = SetProperty(property);
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Error setting property: " << property->type << std::endl;
+        std::cerr << "Error setting property: " << property->type << std::endl;
         err.PrintErrorTrace();
         if(throw_exception == ExceptionHandling::ThrowExceptions)
             throw err.GetType();
@@ -261,7 +261,7 @@ int Camera::get_property(FlyCapture2::PropertyType property_type, FlyCapture2::P
 
     err = GetProperty(property);
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Error retrieving property: " << property_type << std::endl;
+        std::cerr << "Error retrieving property: " << property_type << std::endl;
         err.PrintErrorTrace();
         if(throw_exception == ExceptionHandling::ThrowExceptions)
             throw err.GetType();
@@ -283,7 +283,7 @@ int Camera::set_trigger_mode(FlyCapture2::TriggerMode *trigger_mode, ExceptionHa
 
     err = SetTriggerMode(trigger_mode);
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Error setting Trigger Mode" << std::endl;
+        std::cerr << "Error setting Trigger Mode" << std::endl;
         err.PrintErrorTrace();
         if(throw_exception == ExceptionHandling::ThrowExceptions)
             throw err.GetType();
@@ -305,7 +305,7 @@ int Camera::get_trigger_mode(FlyCapture2::TriggerMode *trigger_mode, ExceptionHa
 
     err = GetTriggerMode(trigger_mode);
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Error retrieving Trigger Mode" << std::endl;
+        std::cerr << "Error retrieving Trigger Mode" << std::endl;
         err.PrintErrorTrace();
         if(throw_exception == ExceptionHandling::ThrowExceptions)
             throw err.GetType();
@@ -327,7 +327,7 @@ int Camera::set_strobe_control(FlyCapture2::StrobeControl *strobe_control, Excep
 
     err = SetStrobe(strobe_control);
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Error setting Strobe Control" << std::endl;
+        std::cerr << "Error setting Strobe Control" << std::endl;
         err.PrintErrorTrace();
         if(throw_exception == ExceptionHandling::ThrowExceptions)
             throw err.GetType();
@@ -349,7 +349,7 @@ int Camera::get_strobe_control(FlyCapture2::StrobeControl *strobe_control, Excep
 
     err = GetStrobe(strobe_control);
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Error retrieving Strobe Control" << std::endl;
+        std::cerr << "Error retrieving Strobe Control" << std::endl;
         err.PrintErrorTrace();
         if(throw_exception == ExceptionHandling::ThrowExceptions)
             throw err.GetType();
@@ -382,9 +382,10 @@ int Camera::start_capture()
         return FlyCapture2::PGRERROR_OK;
 
     _is_capturing = true;
-    err = StartCapture(_new_frame_internal_callback, this);
+    err = StartCapture(_new_frame_internal_callback_wrapper, this);
+
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Error starting capture" << std::endl;
+        std::cerr << "Error starting capture" << std::endl;
         err.PrintErrorTrace();
         _is_capturing = false;
     }
@@ -407,7 +408,7 @@ int Camera::stop_capture()
     _is_capturing = false;
     err = StopCapture();
     if(err != FlyCapture2::PGRERROR_OK) {
-        std::cout << "Error stopping capture" << std::endl;
+        std::cerr << "Error stopping capture" << std::endl;
         err.PrintErrorTrace();
         _is_capturing = true;
     }
@@ -492,7 +493,7 @@ int Camera::set_properties_for_coro_eyes(CameraPosition camera_position)
         set_strobe_control(&strobe_control, ExceptionHandling::ThrowExceptions);
     }
     catch(FlyCapture2::ErrorType err) {
-        std::cout << "Something went wrong. Aborting..." << std::endl;
+        std::cerr << "Something went wrong. Aborting..." << std::endl;
         return err;
     }
 
@@ -513,7 +514,7 @@ int Camera::_get_format7_info(FlyCapture2::Format7Info *f7_info)
     err = GetFormat7Info(f7_info, &f7_supported);
     if(err != FlyCapture2::PGRERROR_OK || !f7_supported) {
         f7_info = nullptr;
-        std::cout << "Can't retrieve Format7 info." << std::endl;
+        std::cerr << "Can't retrieve Format7 info." << std::endl;
         err.PrintErrorTrace();
     }
 
@@ -533,7 +534,7 @@ int Camera::_get_camera_info(FlyCapture2::CameraInfo *camera_info)
     err = GetCameraInfo(camera_info);
     if(err != FlyCapture2::PGRERROR_OK) {
         camera_info = nullptr;
-        std::cout << "Can't retrieve Camera Info." << std::endl;
+        std::cerr << "Can't retrieve Camera Info." << std::endl;
         err.PrintErrorTrace();
     }
 
@@ -541,20 +542,29 @@ int Camera::_get_camera_info(FlyCapture2::CameraInfo *camera_info)
 }
 
 /**
+ * @brief Callback wrapper that calls the internal callback for each camera instance.
+ * @param frame: The new frame received
+ * @param context: Pointer to a Camera instance
+ */
+void Camera::_new_frame_internal_callback_wrapper(FlyCapture2::Image *frame, const void* context)
+{
+    const_cast<Camera*>(static_cast<const Camera*>(context))->_new_frame_internal_callback(frame);
+}
+
+/**
  * @brief Internal callback to make a copy of each new frame received.
  * @details Only the last frame will be kept within the class.
+ * @param frame: The new frame received
  */
-void Camera::_new_frame_internal_callback(FlyCapture2::Image *frame, const void *callback_data)
+void Camera::_new_frame_internal_callback(FlyCapture2::Image *frame)
 {
-    Camera *camera = (Camera*)callback_data;
-
     // Create an OpenCV image from the FlyCapture2::Image
-    cv::Mat cv_frame(camera->get_camera_height(), camera->get_camera_width(), CV_8UC1, frame->GetData());
+    cv::Mat cv_frame(get_camera_height(), get_camera_width(), CV_8UC1, frame->GetData());
 
     // Make a deep copy of the Openc CV image
-    camera->_last_frame = cv_frame.clone();
+    _last_frame = cv_frame.clone();
 
     // Call external callback if it has been set
-    if(camera->_new_frame_external_callback)
-        camera->_new_frame_external_callback(&camera->_last_frame, camera->_external_callback_data);
+    if(_new_frame_external_callback)
+        _new_frame_external_callback(&_last_frame, _external_callback_data);
 }

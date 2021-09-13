@@ -72,7 +72,8 @@ private:
 
     // Image capture
     cv::Mat _last_frame;
-    static void _new_frame_internal_callback(FlyCapture2::Image *frame, const void* callback_data);
+    static void _new_frame_internal_callback_wrapper(FlyCapture2::Image *frame, const void *context);
+    void _new_frame_internal_callback(FlyCapture2::Image *frame);
 
     // External callback
     std::function<void(cv::Mat*, void*)> _new_frame_external_callback = nullptr;

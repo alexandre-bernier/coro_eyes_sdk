@@ -28,7 +28,7 @@ The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following dependency 
 
 ## Installation
 
-### Building from Source
+### Building from source
 
 #### Dependencies
 - [OpenCV](https://opencv.org/)
@@ -52,13 +52,23 @@ The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following dependency 
     The version for Ubuntu 18.04 works on Ubuntu 20.04.<br />
     Follow instructions [<b>here</b>](https://www.flir.ca/support-center/iis/machine-vision/application-note/getting-started-with-flycapture-2.x-and-linux/).
     
+### udev rules
+
+Once udev is installed, you can run the [udev configuration script](install/configure_udev_rule.sh) with sudo to create the udev rules automatically.
+
+    sudo ./configure_udev_rule.sh
+    
+### USBFS memory allocation
+
+Make sure to run the [USBFS configuration script](install/configure_usbfs.sh) with sudo to increase the USBFS memory allocation (especially if you intend to run more than one camera at the same time).
+
+    sudo ./configure_usbfs.sh
+    
+To verify that the script worked, restart your computer and run the following command in a terminal (you should see `1000` as a result):
+
+    cat /sys/module/usbcore/parameters/usbfs_memory_mb
+
 ## Usage
-
-### udev
-
-Once udev is installed, you can run the [udev installation script](install/install_udev_rule.sh) with sudo to create the udev rules automatically.
-
-    sudo ./install_udev_rule.sh
 
 ### Header
 
