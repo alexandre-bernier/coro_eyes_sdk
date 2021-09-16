@@ -359,11 +359,23 @@ int Camera::get_strobe_control(FlyCapture2::StrobeControl *strobe_control, Excep
 }
 
 /**
+ * @brief Set the rectify maps so the images can be undistorted as they are received from the camera.
+ * @param rectify_map1: See cv::initUndistortRectifyMap
+ * @param rectify_map2: See cv::initUndistortRectifyMap
+ */
+void Camera::set_undistort_rectify_maps(cv::Mat rectify_map1, cv::Mat rectify_map2)
+{
+    _rectify_map1 = rectify_map1;
+    _rectify_map2 = rectify_map2;
+    set_undistort_new_frames(true);
+}
+
+/**
  * @brief Set a callback that will be called every time a new frame is received from the camera
  * @param callback: Pointer to the callback function
  * @param callback_data: Pointer to the data that will be passed with every callback calls
  */
-void Camera::set_new_frame_callback(std::function<void(cv::Mat*, void*)> callback, void *callback_data)
+void Camera::set_new_frame_callback(std::function<void(cv::Mat, void*)> callback, void *callback_data)
 {
     _new_frame_external_callback = std::bind(callback, std::placeholders::_1, std::placeholders::_2);
     _external_callback_data = callback_data;
@@ -564,7 +576,12 @@ void Camera::_new_frame_internal_callback(FlyCapture2::Image *frame)
     // Make a deep copy of the Openc CV image
     _last_frame = cv_frame.clone();
 
+    // Undistort the new frame (if requested)
+    if(get_undistort_new_frames()) {
+        cv::remap(_last_frame, _last_frame, _rectify_map1, _rectify_map2, cv::INTER_NEAREST, cv::BORDER_CONSTANT);
+    }
+
     // Call external callback if it has been set
     if(_new_frame_external_callback)
-        _new_frame_external_callback(&_last_frame, _external_callback_data);
+        _new_frame_external_callback(_last_frame.clone(), _external_callback_data);
 }

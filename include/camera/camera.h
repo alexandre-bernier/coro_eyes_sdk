@@ -7,7 +7,9 @@
 
 #include <stdexcept>
 #include <functional>
+#include <mutex>
 #include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <flycapture/FlyCapture2.h>
 
 class Camera : private FlyCapture2::Camera
@@ -48,8 +50,13 @@ public:
     int set_strobe_control(FlyCapture2::StrobeControl *strobe_control, ExceptionHandling throw_exception = ExceptionHandling::NoExceptions);
     int get_strobe_control(FlyCapture2::StrobeControl *strobe_control, ExceptionHandling throw_exception = ExceptionHandling::NoExceptions);
 
+    // Calibration
+    void set_undistort_rectify_maps(cv::Mat rectify_map1, cv::Mat rectify_map2);
+    inline void set_undistort_new_frames(bool undistort) {undistort_new_frames = undistort;}
+    inline bool get_undistort_new_frames() {return undistort_new_frames;}
+
     // Image capture
-    void set_new_frame_callback(std::function<void (cv::Mat*, void*)> callback, void *callback_data);
+    void set_new_frame_callback(std::function<void (cv::Mat, void *)> callback, void *callback_data);
     int start_capture();
     int stop_capture();
     cv::Mat *get_last_frame() {return &_last_frame;};
@@ -61,6 +68,9 @@ private:
     // Bus manager
     static FlyCapture2::BusManager _bus_manager;
 
+    // Mutex
+    std::mutex _last_frame_mutex;
+
     // Flags
     bool _is_capturing = false;
 
@@ -70,13 +80,17 @@ private:
     int _get_format7_info(FlyCapture2::Format7Info *f7_info);
     int _get_camera_info(FlyCapture2::CameraInfo *camera_info);
 
+    // Calibration
+    cv::Mat _rectify_map1, _rectify_map2;
+    bool undistort_new_frames = false;
+
     // Image capture
     cv::Mat _last_frame;
     static void _new_frame_internal_callback_wrapper(FlyCapture2::Image *frame, const void *context);
     void _new_frame_internal_callback(FlyCapture2::Image *frame);
 
     // External callback
-    std::function<void(cv::Mat*, void*)> _new_frame_external_callback = nullptr;
+    std::function<void(cv::Mat, void*)> _new_frame_external_callback = nullptr;
     void *_external_callback_data = nullptr;
 };
 

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<calibration_time>"Wed 01 Sep 2021 11:46:12 AM"</calibration_time>
+<nr_of_frames>5</nr_of_frames>
+<image_width>1280</image_width>
+<image_height>1024</image_height>
+<board_width>8</board_width>
+<board_height>6</board_height>
+<square_size>3.6250000000000000e+01</square_size>
+<!-- flags: +fix_instrinsic +use_intrinsic_guess +fix_k1 +fix_k2 +fix_k3 +fix_k4 +fix_k5 +fix_s1_s2_s3_s4 -->
+<flags>0</flags>
+<fisheye_model>0</fisheye_model>
+<avg_reprojection_error>1.0124694527190087e-01</avg_reprojection_error>
+<R type_id="opencv-matrix">
+  <rows>3</rows>
+  <cols>3</cols>
+  <dt>d</dt>
+  <data>
+    8.6268461561351439e-01 2.3507517842565131e-02 5.0519565574997227e-01
+    -1.0459393451081749e-02 9.9953480553789797e-01
+    -2.8649146705475866e-02 -5.0563411185599272e-01
+    1.9431137980002421e-02 8.6252917388596406e-01</data></R>
+<T type_id="opencv-matrix">
+  <rows>3</rows>
+  <cols>1</cols>
+  <dt>d</dt>
+  <data>
+    -3.0182799632284832e+02 -6.6692712744508453e-01
+    4.0921959088617392e+01</data></T>
+</opencv_storage>

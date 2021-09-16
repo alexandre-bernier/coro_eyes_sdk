@@ -25,7 +25,7 @@ struct FrameInfo {
  * @param frame Pointer to the last frame received in OpenCV format
  * @param callback_data Pointer to a FrameInfo
  */
-void camera_feed_callback(cv::Mat *frame, void *callback_data)
+void camera_feed_callback(cv::Mat frame, void *callback_data)
 {
     // Typecast callback data
     FrameInfo frame_info = *(FrameInfo*)callback_data;
@@ -33,7 +33,7 @@ void camera_feed_callback(cv::Mat *frame, void *callback_data)
     // Rescale image
     float scale_factor = 0.5;
     cv::Mat rescaled_frame;
-    cv::resize(*frame, rescaled_frame, cv::Size(frame_info.image_width*scale_factor, frame_info.image_height*scale_factor));
+    cv::resize(frame, rescaled_frame, cv::Size(frame_info.image_width*scale_factor, frame_info.image_height*scale_factor));
 
     // Show the frame in the appropriate window
     cv::imshow(frame_info.cv_window_name, rescaled_frame);
@@ -306,9 +306,9 @@ int main(void)
 
             // Wait for user to press 'Space'
             cout << endl;
-            cout << "Press Space to capture the chessboard." << endl;
+            cout << "Press any key to capture the chessboard." << endl;
 
-            while(cv::waitKey(1) != 32);
+            cv::waitKey();
 
             // For every camera...
             cout << "Trying to find the chessboard..." << endl;
@@ -360,6 +360,9 @@ int main(void)
 
             }
 
+            cout << endl;
+            cout << "Calibration image " << i_image+1 << " of " << calib_settings.nrFrames << " acquired." << endl;
+
         }
 
     }
@@ -385,47 +388,51 @@ int main(void)
 
 
     /**
-     * @section calibration Camera calibration
-     * @snippet camera_calibration_example.cpp Calibration
+     * @section camera_calibration Camera calibration
+     * @snippet camera_calibration_example.cpp Camera calibration
      */
-    // [Calibration]
+    // [Camera calibration]
+
+    cout << "Running camera calibration..." << endl;
 
     cv::Size image_size(camera[0].get_camera_width(), camera[0].get_camera_height());
 
-    Calibration::Data calib_data[num_cameras];
+    Calibration::Data camera_calib_data[num_cameras];
 
-    bool calibration_successful[num_cameras];
+    bool camera_calib_successful[num_cameras];
 
     // Find the cameras' intrinsic matrix, distorsion coefficients and extrinsic matrices
-    bool save_calibration = true;
+    bool all_camera_calibrated = true;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
         // Calibration
-        calibration_successful[i_cam] = Calibration::run_calibration(calib_settings, image_size, calib_data[i_cam], image_points[i_cam]);
+        camera_calib_successful[i_cam] = Calibration::run_camera_calibration(calib_settings, image_size, camera_calib_data[i_cam], image_points[i_cam]);
 
         // Display the calibration result
-        cout << "Camera " << i_cam << "\n    " <<
-                (calibration_successful[i_cam] ? "Calibration succeeded." : "Calibration failed.") <<
-                " Avg. re-projection error = " << calib_data[i_cam].total_avg_error << endl;
+        cout << "\nCamera " << i_cam << " calibration\n    " <<
+                (camera_calib_successful[i_cam] ? "Calibration succeeded." : "Calibration failed.") <<
+                " Avg. re-projection error = " << camera_calib_data[i_cam].total_avg_error << endl;
 
         // Save calibration if the calibration succeeded for all cameras
-        save_calibration &= calibration_successful[i_cam];
+        all_camera_calibrated &= camera_calib_successful[i_cam];
 
     }
 
     cout << endl;
 
-    // [Calibration]
+    // [Camera calibration]
 
 
     /**
-     * @section save_calib Save the calibration
-     * @snippet camera_calibration_example.cpp Save calibration
+     * @section save_camera_calib Save the camera calibration
+     * @snippet camera_calibration_example.cpp Save camera calibration
      */
-    // [Save calibration]
+    // [Save camera calibration]
 
-    if(save_calibration) {
+    if(all_camera_calibrated) {
+
+        cout << "Saving camera calibration to file..." << endl;
 
         std::string calibration_data_file;
 
@@ -435,13 +442,102 @@ int main(void)
             // Save calibration data
             calibration_data_file = "../resources/calibration/data/camera_" + std::to_string(camera[i_cam].get_serial_number()) + ".xml";
 
-            Calibration::save_calibration(calibration_data_file, calib_settings, image_size, calib_data[i_cam], image_points[i_cam]);
+            Calibration::save_camera_calibration(calibration_data_file, calib_settings, image_size, camera_calib_data[i_cam], image_points[i_cam]);
 
         }
 
     }
 
-    // [Save calibration]
+    // [Save camera calibration]
+
+
+    /**
+     * @section stereo_calibration Stereo calibration
+     * @snippet camera_calibration_example.cpp Stereo calibration
+     */
+    // [Stereo calibration]
+
+    Calibration::StereoData stereo_calib_data;
+
+    bool stereo_calib_successful = false;
+
+    if(all_camera_calibrated) {
+
+        if(num_cameras == 2) {
+
+            cout << "Running stereo camera calibration..." << endl;
+
+            // Find the cameras' intrinsic matrix, distorsion coefficients and extrinsic matrices
+            // Calibration
+            stereo_calib_successful = Calibration::run_stereo_calibration(calib_settings, image_size, stereo_calib_data,
+                                                                          camera_calib_data[0], image_points[0], camera_calib_data[1], image_points[1]);
+
+            // Display the calibration result
+            cout << "\nStereo calibration\n    " <<
+                    (stereo_calib_successful ? "Calibration succeeded." : "Calibration failed.") <<
+                    " Avg. re-projection error = " << stereo_calib_data.total_avg_error << endl;
+
+            cout << endl;
+
+        }
+
+    }
+
+    // [Stereo calibration]
+
+
+    /**
+     * @section save_stereo_calib Save the stereo calibration
+     * @snippet camera_calibration_example.cpp Save stereo calibration
+     */
+    // [Save stereo calibration]
+
+    if(stereo_calib_successful) {
+
+        cout << "Saving stereo camera calibration to file..." << endl;
+
+        std::string calibration_data_file;
+
+        // Save calibration data
+        calibration_data_file = "../resources/calibration/data/stereo_" +
+                std::to_string(camera[0].get_serial_number()) + "_" +
+                std::to_string(camera[1].get_serial_number()) + ".xml";
+
+        Calibration::save_stereo_calibration(calibration_data_file, calib_settings, image_size, stereo_calib_data, image_points[0], image_points[1]);
+
+    }
+
+    // [Save stereo calibration]
+
+
+    /**
+     * @section show_undistorted Show undistorted camera feeds
+     * @snippet camera_calibration_example.cpp Show undistorted
+     */
+    // [Show undistorted]
+
+    if(stereo_calib_successful && calib_settings.showUndistorted) {
+
+        // Create the stereo rectify maps
+        cv::Mat R1, R2, P1, P2, Q;
+        cv::Rect validRoi[2];
+        cv::Mat map1x, map1y, map2x, map2y;
+
+        cv::stereoRectify(camera_calib_data[0].intrinsic, camera_calib_data[0].distorsion, camera_calib_data[1].intrinsic, camera_calib_data[1].distorsion,
+                image_size, stereo_calib_data.R, stereo_calib_data.T, R1, R2, P1, P2, Q, 0, -1, image_size, &validRoi[0], &validRoi[1]);
+
+        cv::initUndistortRectifyMap(camera_calib_data[0].intrinsic, camera_calib_data[0].distorsion,
+                                    R1, P1, image_size, CV_32FC1, map1x, map1y);
+        cv::initUndistortRectifyMap(camera_calib_data[1].intrinsic, camera_calib_data[1].distorsion,
+                                    R2, P2, image_size, CV_32FC1, map2x, map2y);
+
+        // Send the maps to the camera object so it can undistort the new frames
+        camera[0].set_undistort_rectify_maps(map1x, map1y);
+        camera[1].set_undistort_rectify_maps(map2x, map2y);
+
+    }
+
+    // [Show undistorted]
 
 
     /**
@@ -452,7 +548,7 @@ int main(void)
 
     cout << "Press any key to exit." << endl;
 
-    while(cv::waitKey(1) == -1);
+    cv::waitKey();
 
     cout << endl;
 

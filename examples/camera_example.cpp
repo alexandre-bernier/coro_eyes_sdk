@@ -23,7 +23,7 @@ struct FrameInfo {
  * @param frame Pointer to the last frame received in OpenCV format
  * @param callback_data Pointer to a FrameInfo
  */
-void camera_feed_callback(cv::Mat *frame, void *callback_data)
+void camera_feed_callback(cv::Mat frame, void *callback_data)
 {
     // Typecast callback data
     FrameInfo frame_info = *(FrameInfo*)callback_data;
@@ -31,7 +31,7 @@ void camera_feed_callback(cv::Mat *frame, void *callback_data)
     // Rescale image
     float scale_factor = 0.5;
     cv::Mat rescaled_frame;
-    cv::resize(*frame, rescaled_frame, cv::Size(frame_info.image_width*scale_factor, frame_info.image_height*scale_factor));
+    cv::resize(frame, rescaled_frame, cv::Size(frame_info.image_width*scale_factor, frame_info.image_height*scale_factor));
 
     // Show the frame in the appropriate window
     cv::imshow(frame_info.cv_window_name, rescaled_frame);
@@ -244,7 +244,7 @@ int main(void)
      */
     // [Wait for user]
 
-    while(cv::waitKey(1) == -1);
+    cv::waitKey();
 
     // [Wait for user]
 

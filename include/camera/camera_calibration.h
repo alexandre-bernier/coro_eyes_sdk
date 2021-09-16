@@ -72,9 +72,22 @@ static inline void read(const cv::FileNode& node, Settings& x, const Settings& d
         double total_avg_error;
     };
 
+    struct StereoData {
+        cv::Mat R, T, E, F;
+        double total_avg_error;
+    };
+
     bool find_corners(Settings& s, cv::Mat& image, std::vector<cv::Point2f>& image_points);
-    bool run_calibration(Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> > &image_points);
-    bool save_calibration(std::string file_name, Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> > &image_points);
+
+    bool run_camera_calibration(Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> > &image_points);
+    bool save_camera_calibration(std::string file_name, Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> > &image_points);
+
+    bool run_stereo_calibration(Settings& s, cv::Size image_size, StereoData& stereo_calib_data,
+                                Data& cam1_calib_data, std::vector<std::vector<cv::Point2f> > &cam1_image_points,
+                                Data& cam2_calib_data, std::vector<std::vector<cv::Point2f> > &cam2_image_points);
+    bool save_stereo_calibration(std::string file_name, Settings& s, cv::Size image_size, StereoData& stereo_calib_data,
+                                 std::vector<std::vector<cv::Point2f> > &cam1_image_points,
+                                 std::vector<std::vector<cv::Point2f> > &cam2_image_points);
 };
 
 #endif // _CAMERA_CALIBRATION_H

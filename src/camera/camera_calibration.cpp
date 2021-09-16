@@ -169,7 +169,7 @@ void Settings::validate()
         if(fixK2)                   flag |= cv::fisheye::CALIB_FIX_K2;
         if(fixK3)                   flag |= cv::fisheye::CALIB_FIX_K3;
         if(fixK4)                   flag |= cv::fisheye::CALIB_FIX_K4;
-        if (calibFixPrincipalPoint) flag |= cv::fisheye::CALIB_FIX_PRINCIPAL_POINT;
+        if(calibFixPrincipalPoint)  flag |= cv::fisheye::CALIB_FIX_PRINCIPAL_POINT;
     }
 
     calibrationPattern = NOT_EXISTING;
@@ -178,7 +178,7 @@ void Settings::validate()
     if (!patternToUse.compare("ASYMMETRIC_CIRCLES_GRID")) calibrationPattern = ASYMMETRIC_CIRCLES_GRID;
     if (calibrationPattern == NOT_EXISTING)
     {
-        std::cerr << " Camera calibration mode does not exist: " << patternToUse << std::endl;
+        std::cerr << "Camera calibration mode does not exist: " << patternToUse << std::endl;
         goodInput = false;
     }
 }
@@ -236,8 +236,9 @@ bool find_corners(Settings& s, cv::Mat& image, std::vector<cv::Point2f>& image_p
  * @param image_points: Coordinates of the calibration board corners found for all images (see Calibration::find_corners)
  * @return True if the calibration succeeded
  */
-bool run_calibration(Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> >& image_points)
+bool run_camera_calibration(Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> >& image_points)
 {
+    // Initialize calibration data arrays
     calib_data.intrinsic = cv::Mat::eye(3, 3, CV_64F);
 
     if(!s.useFisheye && s.flag & cv::CALIB_FIX_ASPECT_RATIO)
@@ -248,12 +249,12 @@ bool run_calibration(Settings& s, cv::Size image_size, Data& calib_data, std::ve
     else
         calib_data.distorsion = cv::Mat::zeros(8, 1, CV_64F);
 
+    // Create object points
     std::vector<std::vector<cv::Point3f> > objectPoints(1);
     calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
-
     objectPoints.resize(image_points.size(),objectPoints[0]);
 
-    //Find intrinsic and extrinsic camera parameters
+    // Find intrinsic and extrinsic camera parameters
     double rms;
 
     if(s.useFisheye) {
@@ -270,12 +271,11 @@ bool run_calibration(Settings& s, cv::Size image_size, Data& calib_data, std::ve
     }
 
     else {
-        rms = calibrateCamera(objectPoints, image_points, image_size, calib_data.intrinsic, calib_data.distorsion,
-                              calib_data.rvecs, calib_data.tvecs, s.flag);
+        rms = cv::calibrateCamera(objectPoints, image_points, image_size, calib_data.intrinsic, calib_data.distorsion,
+                                  calib_data.rvecs, calib_data.tvecs, s.flag);
     }
 
-    std::cout << "Re-projection error reported by calibrateCamera: "<< rms << std::endl;
-
+    // Re-projection error
     bool ok = checkRange(calib_data.intrinsic) && checkRange(calib_data.distorsion);
 
     calib_data.total_avg_error = computeReprojectionErrors(objectPoints, image_points, calib_data.rvecs, calib_data.tvecs, calib_data.intrinsic,
@@ -293,12 +293,12 @@ bool run_calibration(Settings& s, cv::Size image_size, Data& calib_data, std::ve
  * @param image_points: Coordinates of the calibration board corners found for all images (see Calibration::find_corners)
  * @return True if the file was created successfully
  */
-bool save_calibration(std::string file_name, Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> >& image_points)
+bool save_camera_calibration(std::string file_name, Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> >& image_points)
 {
     cv::FileStorage fs(file_name, cv::FileStorage::WRITE);
 
     if(!fs.isOpened()) {
-        std::cout << "Could not open/create the calibration data file: " << file_name << std::endl;
+        std::cerr << "Could not open/create the calibration data file: " << file_name << std::endl;
         return false;
     }
 
@@ -321,7 +321,7 @@ bool save_calibration(std::string file_name, Settings& s, cv::Size image_size, D
     if(!s.useFisheye && s.flag & cv::CALIB_FIX_ASPECT_RATIO)
         fs << "fix_aspect_ratio" << s.aspectRatio;
 
-    if (s.flag) {
+    if(s.flag) {
         std::stringstream flagsStringStream;
         if (s.useFisheye) {
             flagsStringStream << "flags:"
@@ -355,7 +355,7 @@ bool save_calibration(std::string file_name, Settings& s, cv::Size image_size, D
     fs << "distortion_coefficients" << calib_data.distorsion;
 
     fs << "avg_reprojection_error" << calib_data.total_avg_error;
-    if (s.writeExtrinsics && !calib_data.reproj_errors.empty())
+    if(s.writeExtrinsics && !calib_data.reproj_errors.empty())
         fs << "per_view_reprojection_errors" << cv::Mat(calib_data.reproj_errors);
 
     if(s.writeExtrinsics && !calib_data.rvecs.empty() && !calib_data.tvecs.empty()) {
@@ -395,6 +395,169 @@ bool save_calibration(std::string file_name, Settings& s, cv::Size image_size, D
             imgpti.copyTo(r);
         }
         fs << "image_points" << imagePtMat;
+    }
+
+    return true;
+}
+
+bool run_stereo_calibration(Settings& s, cv::Size image_size, StereoData& stereo_calib_data,
+                            Data& cam1_calib_data, std::vector<std::vector<cv::Point2f> > &cam1_image_points,
+                            Data& cam2_calib_data, std::vector<std::vector<cv::Point2f> > &cam2_image_points)
+{
+    // Check that the cameras' calibration data isn't empty
+    if(cam1_calib_data.intrinsic.empty() || cam2_calib_data.intrinsic.empty() ||
+            cam1_calib_data.distorsion.empty() || cam2_calib_data.distorsion.empty()) {
+        std::cerr << "Camera calibration is empty. Please call \"run_camera_calibration()\" for each camera before calling \"run_stereo_calibration()\"." << std::endl;
+        return false;
+    }
+
+    // Create object points
+    std::vector<std::vector<cv::Point3f> > objectPoints(1);
+    calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
+    objectPoints.resize(cam1_image_points.size(),objectPoints[0]);
+
+    // Create calibration flags
+    int stereo_calibration_flags;
+
+    if(s.useFisheye) {
+        stereo_calibration_flags =
+                cv::fisheye::CALIB_FIX_SKEW |
+                cv::fisheye::CALIB_FIX_INTRINSIC |
+                cv::fisheye::CALIB_USE_INTRINSIC_GUESS |
+                cv::fisheye::CALIB_FIX_K1 |
+                cv::fisheye::CALIB_FIX_K2 |
+                cv::fisheye::CALIB_FIX_K3 |
+                cv::fisheye::CALIB_FIX_K4;
+        if(s.calibFixPrincipalPoint)
+            stereo_calibration_flags |= cv::fisheye::CALIB_FIX_PRINCIPAL_POINT;
+    }
+
+    else {
+        stereo_calibration_flags =
+                cv::CALIB_USE_INTRINSIC_GUESS |
+                cv::CALIB_FIX_INTRINSIC |
+                cv::CALIB_FIX_K1 |
+                cv::CALIB_FIX_K2 |
+                cv::CALIB_FIX_K3 |
+                cv::CALIB_FIX_K4 |
+                cv::CALIB_FIX_K5 |
+                cv::CALIB_FIX_S1_S2_S3_S4;
+        if(s.calibFixPrincipalPoint)
+            stereo_calibration_flags |= cv::CALIB_FIX_PRINCIPAL_POINT;
+        if(s.calibZeroTangentDist)
+            stereo_calibration_flags |= cv::CALIB_ZERO_TANGENT_DIST;
+        if(s.aspectRatio)
+            stereo_calibration_flags |= cv::CALIB_FIX_ASPECT_RATIO;
+    }
+
+    // Find stereo extrinsic parameters (to bring cam1 into cam2's coordinate system)
+    double rms;
+
+    if(s.useFisheye) {
+        rms = cv::fisheye::stereoCalibrate(objectPoints, cam1_image_points, cam2_image_points,
+                                           cam1_calib_data.intrinsic, cam1_calib_data.distorsion, cam2_calib_data.intrinsic, cam2_calib_data.distorsion,
+                                           image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calibration_flags);
+    }
+    else {
+        rms = cv::stereoCalibrate(objectPoints, cam1_image_points, cam2_image_points,
+                                  cam1_calib_data.intrinsic, cam1_calib_data.distorsion, cam2_calib_data.intrinsic, cam2_calib_data.distorsion,
+                                  image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calib_data.E, stereo_calib_data.F,
+                                  stereo_calibration_flags);
+    }
+
+    // Re-projection error
+    bool ok = checkRange(stereo_calib_data.R) && checkRange(stereo_calib_data.T);
+
+    stereo_calib_data.total_avg_error = rms;
+
+    return ok;
+}
+
+bool save_stereo_calibration(std::string file_name, Settings& s, cv::Size image_size, StereoData& stereo_calib_data,
+                             std::vector<std::vector<cv::Point2f> > &cam1_image_points,
+                             std::vector<std::vector<cv::Point2f> > &cam2_image_points)
+{
+    cv::FileStorage fs(file_name, cv::FileStorage::WRITE);
+
+    if(!fs.isOpened()) {
+        std::cerr << "Could not open/create the calibration data file: " << file_name << std::endl;
+        return false;
+    }
+
+    time_t tm;
+    time(&tm);
+    struct tm *t2 = localtime(&tm);
+    char buf[1024];
+    strftime(buf, sizeof(buf), "%c", t2);
+
+    fs << "calibration_time" << buf;
+
+    if(!cam1_image_points.empty())
+        fs << "nr_of_frames" << (int)cam1_image_points.size();
+    fs << "image_width" << image_size.width;
+    fs << "image_height" << image_size.height;
+    fs << "board_width" << s.boardSize.width;
+    fs << "board_height" << s.boardSize.height;
+    fs << "square_size" << s.squareSize;
+
+    if(!s.useFisheye && s.flag & cv::CALIB_FIX_ASPECT_RATIO)
+        fs << "fix_aspect_ratio" << s.aspectRatio;
+
+    std::stringstream flagsStringStream;
+    if (s.useFisheye) {
+        flagsStringStream << "flags:" <<
+                             " +fix_skew" <<
+                             " +fix_instrinsic" <<
+                             " +use_intrinsic_guess" <<
+                             " +fix_k1" <<
+                             " +fix_k2" <<
+                             " +fix_k3" <<
+                             " +fix_k4" <<
+                             (s.calibFixPrincipalPoint ? " +fix_principal_point" : "");
+    }
+    else {
+        flagsStringStream << "flags:" <<
+                             " +fix_instrinsic" <<
+                             " +use_intrinsic_guess" <<
+                             " +fix_k1" <<
+                             " +fix_k2" <<
+                             " +fix_k3" <<
+                             " +fix_k4" <<
+                             " +fix_k5" <<
+                             " +fix_s1_s2_s3_s4" <<
+                             (s.calibFixPrincipalPoint ? " +fix_principal_point" : "") <<
+                             (s.calibZeroTangentDist ? " +zero_tangent_dist" : "") <<
+                             (s.aspectRatio ? " +fix_aspectRatio" : "");
+    }
+    fs.writeComment(flagsStringStream.str());
+
+    fs << "flags" << s.flag;
+
+    fs << "fisheye_model" << s.useFisheye;
+
+    fs << "avg_reprojection_error" << stereo_calib_data.total_avg_error;
+
+    if(!stereo_calib_data.R.empty() && !stereo_calib_data.T.empty()) {
+        fs << "R" << stereo_calib_data.R;
+        fs << "T" << stereo_calib_data.T;
+    }
+
+    if(s.writePoints && !cam1_image_points.empty()) {
+        cv::Mat imagePtMat((int)cam1_image_points.size(), (int)cam1_image_points[0].size(), CV_32FC2);
+
+        for(size_t i=0; i<cam1_image_points.size(); i++) {
+            cv::Mat r = imagePtMat.row(int(i)).reshape(2, imagePtMat.cols);
+            cv::Mat imgpti(cam1_image_points[i]);
+            imgpti.copyTo(r);
+        }
+        fs << "cam1_image_points" << imagePtMat;
+
+        for(size_t i=0; i<cam2_image_points.size(); i++) {
+            cv::Mat r = imagePtMat.row(int(i)).reshape(2, imagePtMat.cols);
+            cv::Mat imgpti(cam2_image_points[i]);
+            imgpti.copyTo(r);
+        }
+        fs << "cam2_image_points" << imagePtMat;
     }
 
     return true;
