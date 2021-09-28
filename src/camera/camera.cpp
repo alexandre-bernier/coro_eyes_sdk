@@ -7,6 +7,8 @@
 #include <flycapture/Error.h>
 #include "camera.h"
 
+#include <opencv2/highgui.hpp>
+
 // Declaration of static variables
 FlyCapture2::BusManager Camera::_bus_manager;
 
@@ -167,7 +169,7 @@ unsigned int Camera::get_camera_width()
 }
 
 /**
- * @brief Configure a camera
+ * @brief Configure a camera.
  * @param f7_image_settings: See FlyCapture2::Format7ImageSettings, or leave empty (nullptr) for default
  * @param flycapture_config: See FlyCapture2::FC2Config, or leave empty (nullptr) for default
  * @return Error code FlyCapture2::Error (0 = No errors)
@@ -271,7 +273,7 @@ int Camera::get_property(FlyCapture2::PropertyType property_type, FlyCapture2::P
 }
 
 /**
- * @brief Set the FlyCapture Trigger Mode in the camera
+ * @brief Set the FlyCapture Trigger Mode in the camera.
  * @param trigger_mode: Pointer of the FlyCapture2::TriggerMode to be sent to the camera
  * @param throw_exception: This parameter determines if this function will throw an exception if something goes wrong
  * (see Camera::ExceptionHandling)
@@ -315,7 +317,7 @@ int Camera::get_trigger_mode(FlyCapture2::TriggerMode *trigger_mode, ExceptionHa
 }
 
 /**
- * @brief Set the FlyCapture Strobe Control in the camera
+ * @brief Set the FlyCapture Strobe Control in the camera.
  * @param strobe_control: Pointer of the FlyCapture2::StrobeControl to be sent to the camera
  * @param throw_exception: This parameter determines if this function will throw an exception if something goes wrong
  * (see Camera::ExceptionHandling)
@@ -359,19 +361,7 @@ int Camera::get_strobe_control(FlyCapture2::StrobeControl *strobe_control, Excep
 }
 
 /**
- * @brief Set the rectify maps so the images can be undistorted as they are received from the camera.
- * @param rectify_map1: See cv::initUndistortRectifyMap
- * @param rectify_map2: See cv::initUndistortRectifyMap
- */
-void Camera::set_undistort_rectify_maps(cv::Mat rectify_map1, cv::Mat rectify_map2)
-{
-    _rectify_map1 = rectify_map1;
-    _rectify_map2 = rectify_map2;
-    set_undistort_new_frames(true);
-}
-
-/**
- * @brief Set a callback that will be called every time a new frame is received from the camera
+ * @brief Set a callback that will be called every time a new frame is received from the camera.
  * @param callback: Pointer to the callback function
  * @param callback_data: Pointer to the data that will be passed with every callback calls
  */
@@ -382,7 +372,16 @@ void Camera::set_new_frame_callback(std::function<void(cv::Mat, void*)> callback
 }
 
 /**
- * @brief Start capturing images
+ * @brief Unregister the external callback.
+ */
+void Camera::unregister_new_frame_callback()
+{
+    _new_frame_external_callback = nullptr;
+    _external_callback_data = nullptr;
+}
+
+/**
+ * @brief Start capturing images.
  * @return Error code FlyCapture2::Error (0 = No errors)
  */
 int Camera::start_capture()
@@ -429,6 +428,27 @@ int Camera::stop_capture()
 }
 
 /**
+ * @brief Get the image buffer content.
+ * @details The image are internally saved in reverse order, but the vector returned will have
+ * the images in chronological order (oldest first).
+ * @return A vector of OpenCV Mat containing the whole image buffer content. The vector will be empty if
+ * the camera is still buffering.
+ */
+std::vector<cv::Mat> Camera::get_image_buffer_content()
+{
+    // Return empty vector if camera is still buffering
+    if(_is_buffering || _image_buffer.empty()) {
+        std::vector<cv::Mat> empty_vector;
+        empty_vector.clear();
+        return empty_vector;
+    }
+
+    // Return a reversed copy of the image buffer
+    std::vector<cv::Mat> reverse_buffer(_image_buffer.rbegin(), _image_buffer.rend());
+    return reverse_buffer;
+}
+
+/**
  * @brief Utility function that sets all properties for the CoRo Eyes camera.
  * @param camera_position: Position of the camera (see Camera::CameraPosition)
  * @return Error code FlyCapture2::Error (0 = No errors)
@@ -443,67 +463,149 @@ int Camera::set_properties_for_coro_eyes(CameraPosition camera_position)
     if(camera_position == CameraPosition::Undefined)
         return FlyCapture2::PGRERROR_UNDEFINED;
 
+    set_camera_position(camera_position);
+
     // Set all properties
     try {
         // Brightness
         get_property(FlyCapture2::PropertyType::BRIGHTNESS, &property, ExceptionHandling::ThrowExceptions);
+        property.absControl = true;
+        property.onePush = false;
+        property.onOff = true;
+        property.autoManualMode = false;
         property.valueA = 0.0;
         set_property(&property, ExceptionHandling::ThrowExceptions);
 
         // Auto-exposure
         get_property(FlyCapture2::PropertyType::AUTO_EXPOSURE, &property, ExceptionHandling::ThrowExceptions);
-        property.onOff = false;
+        property.absControl = true;
+        property.onePush = false;
+        property.onOff = true;
+        property.autoManualMode = false;
         property.absValue = 1.0;
         set_property(&property, ExceptionHandling::ThrowExceptions);
 
         // Sharpness
         get_property(FlyCapture2::PropertyType::SHARPNESS, &property, ExceptionHandling::ThrowExceptions);
+        property.absControl = false;
+        property.onePush = false;
+        property.onOff = true;
+        property.autoManualMode = false;
         property.valueA = 1024;
         set_property(&property, ExceptionHandling::ThrowExceptions);
 
         // Gamma
         get_property(FlyCapture2::PropertyType::GAMMA, &property, ExceptionHandling::ThrowExceptions);
+        property.absControl = true;
+        property.onePush = false;
+        property.onOff = true;
+        property.autoManualMode = false;
         property.absValue = 1.0;
         set_property(&property, ExceptionHandling::ThrowExceptions);
 
         // Shutter
         get_property(FlyCapture2::PropertyType::SHUTTER, &property, ExceptionHandling::ThrowExceptions);
-        property.absValue = 2.0;
+        property.absControl = true;
+        property.onePush = false;
+        property.onOff = true;
+        property.autoManualMode = false;
+        property.absValue = 2.5;
         set_property(&property, ExceptionHandling::ThrowExceptions);
 
         // Gain
         get_property(FlyCapture2::PropertyType::GAIN, &property, ExceptionHandling::ThrowExceptions);
+        property.absControl = true;
+        property.onePush = false;
+        property.onOff = true;
+        property.autoManualMode = false;
         property.absValue = 0.0;
         set_property(&property, ExceptionHandling::ThrowExceptions);
 
         // Frame rate
         get_property(FlyCapture2::PropertyType::FRAME_RATE, &property, ExceptionHandling::ThrowExceptions);
-        property.absValue = 60.0;
+        property.absControl = true;
+        property.onePush = false;
+        property.onOff = true;
+        property.autoManualMode = false;
+        property.absValue = 120.0;
         set_property(&property, ExceptionHandling::ThrowExceptions);
 
         // Trigger delay
         get_property(FlyCapture2::PropertyType::TRIGGER_DELAY, &property, ExceptionHandling::ThrowExceptions);
+        property.absControl = true;
+        property.onePush = false;
+        property.onOff = true;
+        property.autoManualMode = false;
         property.absValue = 0.0;
         set_property(&property, ExceptionHandling::ThrowExceptions);
 
         // Trigger mode
         get_trigger_mode(&trigger_mode, ExceptionHandling::ThrowExceptions);
-        trigger_mode.onOff = (camera_position == CameraPosition::Right);    // The right camera receives an external trigger
+        trigger_mode.onOff = true;
         trigger_mode.polarity = 1;
-        trigger_mode.source = 3;
+        if(_cam_position == CameraPosition::Left) trigger_mode.source = 2;
+        else if(_cam_position == CameraPosition::Right) trigger_mode.source = 3;
         trigger_mode.mode = 0;
         trigger_mode.parameter = 0;
         set_trigger_mode(&trigger_mode, ExceptionHandling::ThrowExceptions);
 
         // Strobe mode
-        strobe_control.source = 2;  // The Strobe Source must be set before calling get or set
-        get_strobe_control(&strobe_control, ExceptionHandling::ThrowExceptions);
-        strobe_control.onOff = (camera_position == CameraPosition::Left);    // The left camera generates the trigger
-        strobe_control.polarity = 0;
-        strobe_control.delay = 0;
-        strobe_control.duration = 1.0;
-        set_strobe_control(&strobe_control, ExceptionHandling::ThrowExceptions);
+//        strobe_control.source = 2;  // The Strobe Source must be set before calling get or set
+//        get_strobe_control(&strobe_control, ExceptionHandling::ThrowExceptions);
+//        strobe_control.onOff = 0;
+//        strobe_control.polarity = 0;
+//        strobe_control.delay = 0;
+//        strobe_control.duration = 0;
+//        set_strobe_control(&strobe_control, ExceptionHandling::ThrowExceptions);
     }
+
+    catch(FlyCapture2::ErrorType err) {
+        std::cerr << "Something went wrong. Aborting..." << std::endl;
+        return err;
+    }
+
+    return FlyCapture2::PGRERROR_OK;
+}
+
+/**
+ * @brief Enable or disable the camera trigger mode.
+ * @param external: If true, the camera trigger mode will be enabled
+ * @return Error code FlyCapture2::Error (0 = No errors)
+ */
+int Camera::set_camera_trigger(bool external)
+{
+    FlyCapture2::TriggerMode trigger_mode;
+
+    try {
+        get_trigger_mode(&trigger_mode, ExceptionHandling::ThrowExceptions);
+        trigger_mode.onOff = external;
+        set_trigger_mode(&trigger_mode, ExceptionHandling::ThrowExceptions);
+    }
+
+    catch(FlyCapture2::ErrorType err) {
+        std::cerr << "Something went wrong. Aborting..." << std::endl;
+        return err;
+    }
+
+    return FlyCapture2::PGRERROR_OK;
+}
+
+/**
+ * @brief Set the shutter speed.
+ * @param shutter_speed: New shutter speed
+ * @return Error code FlyCapture2::Error (0 = No errors)
+ */
+int Camera::set_shutter_speed(float shutter_speed)
+{
+    FlyCapture2::Property property;
+
+    // Shutter
+    try {
+        get_property(FlyCapture2::PropertyType::SHUTTER, &property, ExceptionHandling::ThrowExceptions);
+        property.absValue = shutter_speed;
+        set_property(&property, ExceptionHandling::ThrowExceptions);
+    }
+
     catch(FlyCapture2::ErrorType err) {
         std::cerr << "Something went wrong. Aborting..." << std::endl;
         return err;
@@ -573,12 +675,22 @@ void Camera::_new_frame_internal_callback(FlyCapture2::Image *frame)
     // Create an OpenCV image from the FlyCapture2::Image
     cv::Mat cv_frame(get_camera_height(), get_camera_width(), CV_8UC1, frame->GetData());
 
+    // Lock mutex
+    if(!_last_frame_mutex.try_lock())
+        return;
+
     // Make a deep copy of the Openc CV image
     _last_frame = cv_frame.clone();
 
-    // Undistort the new frame (if requested)
-    if(get_undistort_new_frames()) {
-        cv::remap(_last_frame, _last_frame, _rectify_map1, _rectify_map2, cv::INTER_NEAREST, cv::BORDER_CONSTANT);
+    // Unlock mutex
+    _last_frame_mutex.unlock();
+
+    // Buffer frame if requested
+    if(_is_buffering) {
+        _image_buffer.insert(_image_buffer.begin(), cv_frame.clone());
+
+        if(_image_buffer.size() > _image_buffer_size)
+            _image_buffer.resize(_image_buffer_size);
     }
 
     // Call external callback if it has been set

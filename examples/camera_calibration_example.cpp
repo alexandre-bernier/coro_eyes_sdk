@@ -88,6 +88,8 @@ int main(void)
 
         cerr << "No camera connected. Stopping application..." << endl;
 
+        cout << "Stopping application..." << endl;
+
         return -1;
 
     }
@@ -105,11 +107,13 @@ int main(void)
 
     FlyCapture2::PGRGuid guid[num_cameras];
 
-    for(unsigned int i=0; i<num_cameras; i++) {
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
-        if(Camera::get_guid(i, &guid[i])) {
+        if(Camera::get_guid(i_cam, &guid[i_cam])) {
 
-            cerr << "Can't get GUID of camera " << i << endl;
+            cerr << "Can't get GUID of camera " << i_cam << endl;
+
+            cout << "Stopping application..." << endl;
 
             return -1;
         }
@@ -128,15 +132,19 @@ int main(void)
 
     Camera camera[num_cameras];
 
-    for(unsigned int i=0; i<num_cameras; i++) {
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
-        if(camera[i].connect(&guid[i]) != FlyCapture2::PGRERROR_OK) {
+        if(camera[i_cam].connect(&guid[i_cam]) != FlyCapture2::PGRERROR_OK) {
 
-            cerr << "Can't connect to camera " << i << endl;
+            cerr << "Can't connect to camera " << i_cam << endl;
+
+            cout << "Stopping application..." << endl;
+
+            return -1;
 
         }
 
-        cout << "Serial number" << ": " << camera[i].get_serial_number() << endl;
+        cout << "Serial number" << ": " << camera[i_cam].get_serial_number() << endl;
 
     }
 
@@ -151,19 +159,13 @@ int main(void)
 
     cout << "Configuring all connected cameras..." << endl;
 
-    for(unsigned int i=0; i<num_cameras; i++) {
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
-        if(camera[i].configure()) {
+        if(camera[i_cam].configure()) {
 
-            cerr << "Can't configure camera " << i << endl;
+            cerr << "Can't configure camera " << i_cam << endl;
 
-            cout << "Disconnecting from all cameras" << endl;
-
-            for(unsigned int i=0; i<num_cameras; i++) {
-
-                camera[i].disconnect();
-
-            }
+            cout << "Stopping application..." << endl;
 
             return -1;
 
@@ -184,13 +186,17 @@ int main(void)
 
     Camera::CameraPosition camera_position = Camera::CameraPosition::Undefined;
 
-    for(unsigned int i=0; i<num_cameras; i++) {
+    int camL_index, camR_index;     // Index of the left and right camera
 
-        switch(camera[i].get_serial_number()) {
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
+
+        switch(camera[i_cam].get_serial_number()) {
 
         case 19153384:  // Serial number of the left camera
 
             camera_position = Camera::CameraPosition::Left;
+
+            camL_index = i_cam;
 
             break;
 
@@ -198,27 +204,23 @@ int main(void)
 
             camera_position = Camera::CameraPosition::Right;
 
+            camR_index = i_cam;
+
             break;
 
         default:
 
-            cerr << "Unrecognized camera (" << camera[i].get_serial_number() << ")." << endl;
+            cerr << "Unrecognized camera (" << camera[i_cam].get_serial_number() << ")." << endl;
 
             break;
 
         }
 
-        if(camera[i].set_properties_for_coro_eyes(camera_position)) {
+        if(camera[i_cam].set_properties_for_coro_eyes(camera_position)) {
 
-            cerr << "Can't configure camera " << i << "." << endl;
+            cerr << "Can't configure camera " << i_cam << "." << endl;
 
-            cout << "Disconnecting from all cameras" << endl;
-
-            for(unsigned int i=0; i<num_cameras; i++) {
-
-                camera[i].disconnect();
-
-            }
+            cout << "Stopping application..." << endl;
 
             return -1;
 
@@ -230,28 +232,45 @@ int main(void)
 
 
     /**
+     * @section other_properties Overwriting some properties for calibration
+     * @snippet camera_calibration_example.cpp Other properties
+     */
+    // [Other properties]
+
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
+
+        camera[i_cam].set_camera_trigger(false);
+
+        camera[i_cam].set_shutter_speed(8.0);
+
+    }
+
+    // [Other properties]
+
+
+    /**
      * @section feeds Setup camera feeds
      * @snippet camera_calibration_example.cpp Camera feeds
      */
     // [Camera feeds]
 
-    cout << "Starting up camera feeds..." << endl;
+//    cout << "Starting up camera feeds..." << endl;
 
-    FrameInfo frame_info[num_cameras];
+//    FrameInfo frame_info[num_cameras];
 
-    for(unsigned int i=0; i<num_cameras; i++) {
+//    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
-        frame_info[i].cv_window_name = "Camera " + std::to_string(i);
+//        frame_info[i_cam].cv_window_name = "Camera " + std::to_string(i_cam);
 
-        frame_info[i].image_height = camera[i].get_camera_height();
+//        frame_info[i_cam].image_height = camera[i_cam].get_camera_height();
 
-        frame_info[i].image_width = camera[i].get_camera_width();
+//        frame_info[i_cam].image_width = camera[i_cam].get_camera_width();
 
-        cv::namedWindow(frame_info[i].cv_window_name, cv::WINDOW_AUTOSIZE);
+//        cv::namedWindow(frame_info[i_cam].cv_window_name, cv::WINDOW_AUTOSIZE);
 
-        camera[i].set_new_frame_callback(camera_feed_callback, &frame_info[i]);
+//        camera[i_cam].set_new_frame_callback(camera_feed_callback, &frame_info[i_cam]);
 
-    }
+//    }
 
     // [Camera feeds]
 
@@ -264,9 +283,9 @@ int main(void)
 
     cout << "Starting captures..." << endl;
 
-    for(unsigned int i=0; i<num_cameras; i++) {
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
-        camera[i].start_capture();
+        camera[i_cam].start_capture();
 
     }
 
@@ -304,11 +323,29 @@ int main(void)
         // Until the captured calibration image is good for all cameras
         while(!good_image) {
 
-            // Wait for user to press 'Space'
+            // Wait for user to press a key
             cout << endl;
+
             cout << "Press any key to capture the chessboard." << endl;
 
-            cv::waitKey();
+//            cv::waitKey();
+
+            do {
+
+                cv::Mat image[num_cameras];
+
+                for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
+
+                    // Rescale image
+                    float scale_factor = 0.5;
+                    cv::Mat rescaled_frame;
+                    cv::resize(camera[i_cam].get_last_frame(), image[i_cam], cv::Size(camera[i_cam].get_camera_width()*scale_factor, camera[i_cam].get_camera_height()*scale_factor));
+
+                    imshow("Camera " + to_string(i_cam), image[i_cam]);
+
+                }
+
+            } while(cv::waitKey(1) == -1);
 
             // For every camera...
             cout << "Trying to find the chessboard..." << endl;
@@ -316,7 +353,7 @@ int main(void)
             for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
                 // Save last frame
-                captured_images[i_cam] = camera[i_cam].get_last_frame()->clone();
+                captured_images[i_cam] = camera[i_cam].get_last_frame();
 
                 // Try to find the chessboard corners
                 good_image = Calibration::find_corners(calib_settings, captured_images[i_cam], temp_image_points[i_cam]);
@@ -361,6 +398,7 @@ int main(void)
             }
 
             cout << endl;
+
             cout << "Calibration image " << i_image+1 << " of " << calib_settings.nrFrames << " acquired." << endl;
 
         }
@@ -444,7 +482,11 @@ int main(void)
 
             Calibration::save_camera_calibration(calibration_data_file, calib_settings, image_size, camera_calib_data[i_cam], image_points[i_cam]);
 
+            cout << "\tCamera " << i_cam << ": " << calibration_data_file << endl;
+
         }
+
+        cout << endl;
 
     }
 
@@ -470,7 +512,7 @@ int main(void)
             // Find the cameras' intrinsic matrix, distorsion coefficients and extrinsic matrices
             // Calibration
             stereo_calib_successful = Calibration::run_stereo_calibration(calib_settings, image_size, stereo_calib_data,
-                                                                          camera_calib_data[0], image_points[0], camera_calib_data[1], image_points[1]);
+                                                                          camera_calib_data[camL_index], image_points[camL_index], camera_calib_data[camR_index], image_points[camR_index]);
 
             // Display the calibration result
             cout << "\nStereo calibration\n    " <<
@@ -500,59 +542,18 @@ int main(void)
 
         // Save calibration data
         calibration_data_file = "../resources/calibration/data/stereo_" +
-                std::to_string(camera[0].get_serial_number()) + "_" +
-                std::to_string(camera[1].get_serial_number()) + ".xml";
+                std::to_string(camera[camL_index].get_serial_number()) + "_" +
+                std::to_string(camera[camR_index].get_serial_number()) + ".xml";
 
-        Calibration::save_stereo_calibration(calibration_data_file, calib_settings, image_size, stereo_calib_data, image_points[0], image_points[1]);
+        Calibration::save_stereo_calibration(calibration_data_file, calib_settings, image_size, stereo_calib_data, image_points[camL_index], image_points[camR_index]);
+
+        cout << "\t" << calibration_data_file << endl;
+
+        cout << endl;
 
     }
 
     // [Save stereo calibration]
-
-
-    /**
-     * @section show_undistorted Show undistorted camera feeds
-     * @snippet camera_calibration_example.cpp Show undistorted
-     */
-    // [Show undistorted]
-
-    if(stereo_calib_successful && calib_settings.showUndistorted) {
-
-        // Create the stereo rectify maps
-        cv::Mat R1, R2, P1, P2, Q;
-        cv::Rect validRoi[2];
-        cv::Mat map1x, map1y, map2x, map2y;
-
-        cv::stereoRectify(camera_calib_data[0].intrinsic, camera_calib_data[0].distorsion, camera_calib_data[1].intrinsic, camera_calib_data[1].distorsion,
-                image_size, stereo_calib_data.R, stereo_calib_data.T, R1, R2, P1, P2, Q, 0, -1, image_size, &validRoi[0], &validRoi[1]);
-
-        cv::initUndistortRectifyMap(camera_calib_data[0].intrinsic, camera_calib_data[0].distorsion,
-                                    R1, P1, image_size, CV_32FC1, map1x, map1y);
-        cv::initUndistortRectifyMap(camera_calib_data[1].intrinsic, camera_calib_data[1].distorsion,
-                                    R2, P2, image_size, CV_32FC1, map2x, map2y);
-
-        // Send the maps to the camera object so it can undistort the new frames
-        camera[0].set_undistort_rectify_maps(map1x, map1y);
-        camera[1].set_undistort_rectify_maps(map2x, map2y);
-
-    }
-
-    // [Show undistorted]
-
-
-    /**
-     * @section wait_user Wait for the user to press a key
-     * @snippet camera_calibration_example.cpp Wait for user
-     */
-    // [Wait for user]
-
-    cout << "Press any key to exit." << endl;
-
-    cv::waitKey();
-
-    cout << endl;
-
-    // [Wait for user]
 
 
     /**
@@ -563,9 +564,9 @@ int main(void)
 
     cout << "Stopping captures..." << endl;
 
-    for(unsigned int i=0; i<num_cameras; i++) {
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
-        camera[i].stop_capture();
+        camera[i_cam].stop_capture();
 
     }
 
@@ -591,9 +592,9 @@ int main(void)
 
     cout << "Disconnecting from all cameras..." << endl;
 
-    for(unsigned int i=0; i<num_cameras; i++) {
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
-        camera[i].disconnect();
+        camera[i_cam].disconnect();
 
     }
 

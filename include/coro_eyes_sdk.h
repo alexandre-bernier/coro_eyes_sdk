@@ -9,5 +9,6 @@
 #include "camera.h"
 #include "camera_calibration.h"
 #include "projector.h"
+#include "structured_light.h"
 
 #endif // _CORO_EYES_SDK_H

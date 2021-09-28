@@ -15,12 +15,12 @@
 		  <Input_FlipAroundHorizontalAxis>0</Input_FlipAroundHorizontalAxis>
 		  
 		  <!-- How many frames to use, for calibration. -->
-		  <Calibrate_NrOfFrameToUse>20</Calibrate_NrOfFrameToUse>
+		  <Calibrate_NrOfFrameToUse>35</Calibrate_NrOfFrameToUse>
 		  <!-- Consider only fy as a free parameter, the ratio fx/fy stays the same as in the input cameraMatrix. 
 			   Use or not setting. 0 - False Non-Zero - True-->
-		  <Calibrate_FixAspectRatio>0</Calibrate_FixAspectRatio>
+		  <Calibrate_FixAspectRatio>1</Calibrate_FixAspectRatio>
 		  <!-- If true (non-zero) tangential distortion coefficients  are set to zeros and stay zero.-->
-		  <Calibrate_AssumeZeroTangentialDistortion>0</Calibrate_AssumeZeroTangentialDistortion>
+		  <Calibrate_AssumeZeroTangentialDistortion>1</Calibrate_AssumeZeroTangentialDistortion>
 		  <!-- If true (non-zero) the principal point is not changed during the global optimization.-->
 		  <Calibrate_FixPrincipalPointAtTheCenter>0</Calibrate_FixPrincipalPointAtTheCenter>
 		  

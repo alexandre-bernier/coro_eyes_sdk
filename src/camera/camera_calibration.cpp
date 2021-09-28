@@ -359,32 +359,9 @@ bool save_camera_calibration(std::string file_name, Settings& s, cv::Size image_
         fs << "per_view_reprojection_errors" << cv::Mat(calib_data.reproj_errors);
 
     if(s.writeExtrinsics && !calib_data.rvecs.empty() && !calib_data.tvecs.empty()) {
-        CV_Assert(calib_data.rvecs[0].type() == calib_data.tvecs[0].type());
-        cv::Mat bigmat((int)calib_data.rvecs.size(), 6, CV_MAKETYPE(calib_data.rvecs[0].type(), 1));
-        bool needReshapeR = calib_data.rvecs[0].depth() != 1 ? true : false;
-        bool needReshapeT = calib_data.tvecs[0].depth() != 1 ? true : false;
-
-        for(size_t i=0; i<calib_data.rvecs.size(); i++) {
-            cv::Mat r = bigmat(cv::Range(int(i), int(i+1)), cv::Range(0,3));
-            cv::Mat t = bigmat(cv::Range(int(i), int(i+1)), cv::Range(3,6));
-
-            if(needReshapeR)
-                calib_data.rvecs[i].reshape(1, 1).copyTo(r);
-            else {
-                //*.t() is MatExpr (not Mat) so we can use assignment operator
-                CV_Assert(calib_data.rvecs[i].rows == 3 && calib_data.rvecs[i].cols == 1);
-                r = calib_data.rvecs[i].t();
-            }
-
-            if(needReshapeT)
-                calib_data.tvecs[i].reshape(1, 1).copyTo(t);
-            else {
-                CV_Assert(calib_data.tvecs[i].rows == 3 && calib_data.tvecs[i].cols == 1);
-                t = calib_data.tvecs[i].t();
-            }
-        }
-        fs.writeComment("a set of 6-tuples (rotation vector + translation vector) for each view");
-        fs << "extrinsic_parameters" << bigmat;
+        fs.writeComment("extrinsic parameters");
+        fs << "rvecs" << calib_data.rvecs;
+        fs << "tvecs" << calib_data.tvecs;
     }
 
     if(s.writePoints && !image_points.empty()) {
@@ -400,21 +377,62 @@ bool save_camera_calibration(std::string file_name, Settings& s, cv::Size image_
     return true;
 }
 
+/**
+ * @brief Load camera calibratino data from file.
+ * @param [in] file_name: Name of the file where the calibration results are stored
+ * @param [out] calib_data: Structure containing the camera calibration results (see Calibration::run_calibration)
+ * @return True if the calibration data was loaded successfully
+ */
+bool load_camera_calibration(std::string file_name, Data& calib_data)
+{
+    cv::FileStorage fs(file_name, cv::FileStorage::READ);
+
+    if(!fs.isOpened()) {
+        std::cout << "Could not open the stereo calibration data file: " << file_name << std::endl;
+        return false;
+    }
+
+    fs["camera_matrix"] >> calib_data.intrinsic;
+    fs["distortion_coefficients"] >> calib_data.distorsion;
+
+    // Not loading these parameters for now since they aren't needed (and they aren't always saved to file)
+//    fs["rvecs"] >> calib_data.rvecs;
+//    fs["tvecs"] >> calib_data.tvecs;
+//    fs["avg_reprojection_error"] >> calib_data.total_avg_error;
+//    fs["per_view_reprojection_errors"] >> calib_data.reproj_errors;
+
+    fs.release();
+
+    return true;
+}
+
+/**
+ * @brief Run stereo camera calibration and generate rectify maps.
+ * @param s: Calibration settings (see Calibration::Settings)
+ * @param image_size: Size of the images used to find the image_points in cv::Size format
+ * @param [out] stereo_calib_data: Structure containing the stereo camera calibration results (see Calibration::StereoData)
+ * @param [in] camL_calib_data: Structure containing the camera calibration results (see Calibration::run_camera_calibration)
+ * @param [in] camL_image_points: Coordinates of the calibration board corners found for all images (see Calibration::find_corners)
+ * @param [in] camR_calib_data: Structure containing the camera calibration results (see Calibration::run_camera_calibration)
+ * @param [in] camR_image_points: Coordinates of the calibration board corners found for all images (see Calibration::find_corners)
+ * @return True if the calibration succeeded
+ */
 bool run_stereo_calibration(Settings& s, cv::Size image_size, StereoData& stereo_calib_data,
-                            Data& cam1_calib_data, std::vector<std::vector<cv::Point2f> > &cam1_image_points,
-                            Data& cam2_calib_data, std::vector<std::vector<cv::Point2f> > &cam2_image_points)
+                            Data& camL_calib_data, std::vector<std::vector<cv::Point2f> > &camL_image_points,
+                            Data& camR_calib_data, std::vector<std::vector<cv::Point2f> > &camR_image_points)
 {
     // Check that the cameras' calibration data isn't empty
-    if(cam1_calib_data.intrinsic.empty() || cam2_calib_data.intrinsic.empty() ||
-            cam1_calib_data.distorsion.empty() || cam2_calib_data.distorsion.empty()) {
+    if(camL_calib_data.intrinsic.empty() || camR_calib_data.intrinsic.empty() ||
+            camL_calib_data.distorsion.empty() || camR_calib_data.distorsion.empty()) {
         std::cerr << "Camera calibration is empty. Please call \"run_camera_calibration()\" for each camera before calling \"run_stereo_calibration()\"." << std::endl;
         return false;
     }
 
     // Create object points
-    std::vector<std::vector<cv::Point3f> > objectPoints(1);
+    std::vector<std::vector<cv::Point3f> > objectPoints;
+    objectPoints.resize(1);
     calcBoardCornerPositions(s.boardSize, s.squareSize, objectPoints[0], s.calibrationPattern);
-    objectPoints.resize(cam1_image_points.size(),objectPoints[0]);
+    objectPoints.resize(camL_image_points.size(), objectPoints[0]);
 
     // Create calibration flags
     int stereo_calibration_flags;
@@ -435,13 +453,11 @@ bool run_stereo_calibration(Settings& s, cv::Size image_size, StereoData& stereo
     else {
         stereo_calibration_flags =
                 cv::CALIB_USE_INTRINSIC_GUESS |
-                cv::CALIB_FIX_INTRINSIC |
-                cv::CALIB_FIX_K1 |
-                cv::CALIB_FIX_K2 |
+                cv::CALIB_SAME_FOCAL_LENGTH |
+                cv::CALIB_RATIONAL_MODEL |
                 cv::CALIB_FIX_K3 |
                 cv::CALIB_FIX_K4 |
-                cv::CALIB_FIX_K5 |
-                cv::CALIB_FIX_S1_S2_S3_S4;
+                cv::CALIB_FIX_K5;
         if(s.calibFixPrincipalPoint)
             stereo_calibration_flags |= cv::CALIB_FIX_PRINCIPAL_POINT;
         if(s.calibZeroTangentDist)
@@ -454,15 +470,16 @@ bool run_stereo_calibration(Settings& s, cv::Size image_size, StereoData& stereo
     double rms;
 
     if(s.useFisheye) {
-        rms = cv::fisheye::stereoCalibrate(objectPoints, cam1_image_points, cam2_image_points,
-                                           cam1_calib_data.intrinsic, cam1_calib_data.distorsion, cam2_calib_data.intrinsic, cam2_calib_data.distorsion,
-                                           image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calibration_flags);
+        rms = cv::fisheye::stereoCalibrate(objectPoints, camL_image_points, camR_image_points,
+                                           camL_calib_data.intrinsic, camL_calib_data.distorsion, camR_calib_data.intrinsic, camR_calib_data.distorsion,
+                                           image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calibration_flags,
+                                           cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 100, 1e-5));
     }
     else {
-        rms = cv::stereoCalibrate(objectPoints, cam1_image_points, cam2_image_points,
-                                  cam1_calib_data.intrinsic, cam1_calib_data.distorsion, cam2_calib_data.intrinsic, cam2_calib_data.distorsion,
+        rms = cv::stereoCalibrate(objectPoints, camL_image_points, camR_image_points,
+                                  camL_calib_data.intrinsic, camL_calib_data.distorsion, camR_calib_data.intrinsic, camR_calib_data.distorsion,
                                   image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calib_data.E, stereo_calib_data.F,
-                                  stereo_calibration_flags);
+                                  stereo_calibration_flags, cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 100, 1e-5));
     }
 
     // Re-projection error
@@ -470,12 +487,27 @@ bool run_stereo_calibration(Settings& s, cv::Size image_size, StereoData& stereo
 
     stereo_calib_data.total_avg_error = rms;
 
+    // Find rectification transforms for each camera
+    cv::stereoRectify(camL_calib_data.intrinsic, camL_calib_data.distorsion, camR_calib_data.intrinsic, camR_calib_data.distorsion,
+                      image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calib_data.R1, stereo_calib_data.R2, stereo_calib_data.P1, stereo_calib_data.P2, stereo_calib_data.Q,
+                      cv::CALIB_ZERO_DISPARITY, 1, image_size, &stereo_calib_data.validROI1, &stereo_calib_data.validROI2);
+
     return ok;
 }
 
+/**
+ * @brief Save the calibration results to a file
+ * @param file_name: Name of the file where the calibration results will be saved
+ * @param s: Calibration settings (see Calibration::Settings)
+ * @param image_size: Size of the images used to find the image_points in cv::Size format
+ * @param stereo_calib_data: Structure containing the stereo camera calibration results (see Calibration::StereoData)
+ * @param camL_image_points: Coordinates of the calibration board corners found for all images (see Calibration::find_corners)
+ * @param camR_image_points: Coordinates of the calibration board corners found for all images (see Calibration::find_corners)
+ * @return True if the file was created successfully
+ */
 bool save_stereo_calibration(std::string file_name, Settings& s, cv::Size image_size, StereoData& stereo_calib_data,
-                             std::vector<std::vector<cv::Point2f> > &cam1_image_points,
-                             std::vector<std::vector<cv::Point2f> > &cam2_image_points)
+                             std::vector<std::vector<cv::Point2f> > &camL_image_points,
+                             std::vector<std::vector<cv::Point2f> > &camR_image_points)
 {
     cv::FileStorage fs(file_name, cv::FileStorage::WRITE);
 
@@ -492,8 +524,8 @@ bool save_stereo_calibration(std::string file_name, Settings& s, cv::Size image_
 
     fs << "calibration_time" << buf;
 
-    if(!cam1_image_points.empty())
-        fs << "nr_of_frames" << (int)cam1_image_points.size();
+    if(!camL_image_points.empty())
+        fs << "nr_of_frames" << (int)camL_image_points.size();
     fs << "image_width" << image_size.width;
     fs << "image_height" << image_size.height;
     fs << "board_width" << s.boardSize.width;
@@ -537,27 +569,134 @@ bool save_stereo_calibration(std::string file_name, Settings& s, cv::Size image_
 
     fs << "avg_reprojection_error" << stereo_calib_data.total_avg_error;
 
-    if(!stereo_calib_data.R.empty() && !stereo_calib_data.T.empty()) {
+    if(!stereo_calib_data.R.empty() && !stereo_calib_data.T.empty() &&
+            !stereo_calib_data.E.empty() && !stereo_calib_data.F.empty()) {
         fs << "R" << stereo_calib_data.R;
         fs << "T" << stereo_calib_data.T;
+        fs << "E" << stereo_calib_data.E;
+        fs << "F" << stereo_calib_data.F;
     }
 
-    if(s.writePoints && !cam1_image_points.empty()) {
-        cv::Mat imagePtMat((int)cam1_image_points.size(), (int)cam1_image_points[0].size(), CV_32FC2);
+    if(!stereo_calib_data.R1.empty() && !stereo_calib_data.R2.empty() &&
+            !stereo_calib_data.P1.empty() && !stereo_calib_data.P2.empty() &&
+            !stereo_calib_data.Q.empty()) {
+        fs << "R1" << stereo_calib_data.R1;
+        fs << "R2" << stereo_calib_data.R2;
+        fs << "P1" << stereo_calib_data.P1;
+        fs << "P2" << stereo_calib_data.P2;
+        fs << "Q" << stereo_calib_data.Q;
+    }
 
-        for(size_t i=0; i<cam1_image_points.size(); i++) {
+    if(!stereo_calib_data.validROI1.empty() && !stereo_calib_data.validROI2.empty()) {
+        fs << "validROI1" << stereo_calib_data.validROI1;
+        fs << "validROI2" << stereo_calib_data.validROI2;
+    }
+
+    if(s.writePoints && !camL_image_points.empty()) {
+        cv::Mat imagePtMat((int)camL_image_points.size(), (int)camL_image_points[0].size(), CV_32FC2);
+
+        for(size_t i=0; i<camL_image_points.size(); i++) {
             cv::Mat r = imagePtMat.row(int(i)).reshape(2, imagePtMat.cols);
-            cv::Mat imgpti(cam1_image_points[i]);
+            cv::Mat imgpti(camL_image_points[i]);
             imgpti.copyTo(r);
         }
         fs << "cam1_image_points" << imagePtMat;
 
-        for(size_t i=0; i<cam2_image_points.size(); i++) {
+        for(size_t i=0; i<camR_image_points.size(); i++) {
             cv::Mat r = imagePtMat.row(int(i)).reshape(2, imagePtMat.cols);
-            cv::Mat imgpti(cam2_image_points[i]);
+            cv::Mat imgpti(camR_image_points[i]);
             imgpti.copyTo(r);
         }
         fs << "cam2_image_points" << imagePtMat;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Load stereo calibratino data from file.
+ * @param [in] file_name: Name of the file where the calibration results are stored
+ * @param [out] stereo_calib_data: Structure that will contain the stereo camera calibration results (see Calibration::StereoData)
+ * @return True if the calibration data was loaded successfully
+ */
+bool load_stereo_calibration(std::string file_name, StereoData& stereo_calib_data)
+{
+    cv::FileStorage fs(file_name, cv::FileStorage::READ);
+
+    if(!fs.isOpened()) {
+        std::cout << "Could not open the stereo calibration data file: " << file_name << std::endl;
+        return false;
+    }
+
+    fs["R"] >> stereo_calib_data.R;
+    fs["T"] >> stereo_calib_data.T;
+    fs["E"] >> stereo_calib_data.E;
+    fs["F"] >> stereo_calib_data.F;
+    fs["avg_reprojection_error"] >> stereo_calib_data.total_avg_error;
+    fs["R1"] >> stereo_calib_data.R1;
+    fs["R2"] >> stereo_calib_data.R2;
+    fs["P1"] >> stereo_calib_data.P1;
+    fs["P2"] >> stereo_calib_data.P2;
+    fs["Q"] >> stereo_calib_data.Q;
+    fs["validROI1"] >> stereo_calib_data.validROI1;
+    fs["validROI2"] >> stereo_calib_data.validROI2;
+
+    fs.release();
+
+    return true;
+}
+
+/**
+ * @brief Generate stereo rectify maps from provided calibration data
+ * @param [in] camL_calib_data: Structure containing the camera calibration results (see Calibration::run_camera_calibration)
+ * @param [in] camR_calib_data: Structure containing the camera calibration results (see Calibration::run_camera_calibration)
+ * @param [in] stereo_calib_data: Structure containing the stereo camera calibration results (see Calibration::StereoData)
+ * @param [in] image_size: Size of the images used to find the image_points in cv::Size format
+ * @param [out] reproj_maps_L: Structure containing re-projection maps (see Calibration::ReprojMaps)
+ * @param [out] reproj_maps_R: Structure containing re-projection maps (see Calibration::ReprojMaps)
+ * @return True if the rectify maps were generated successfuly
+ */
+bool calculate_stereo_reproj_maps(Data& camL_calib_data, Data& camR_calib_data, StereoData& stereo_calib_data, cv::Size image_size,
+                                  ReprojMaps &reproj_maps_L, ReprojMaps &reproj_maps_R)
+{
+    // Exit if data is missing
+    if(camL_calib_data.intrinsic.empty() || camL_calib_data.distorsion.empty() ||
+            camR_calib_data.intrinsic.empty() || camR_calib_data.distorsion.empty() ||
+            stereo_calib_data.R1.empty() || stereo_calib_data.P1.empty() ||
+            stereo_calib_data.R2.empty() || stereo_calib_data.P2.empty() ||
+            image_size.width <= 0 || image_size.height <= 0)
+        return false;
+
+    // Generate stereo rectify maps from provided calibration data
+    cv::initUndistortRectifyMap(camL_calib_data.intrinsic, camL_calib_data.distorsion,
+                                stereo_calib_data.R1, stereo_calib_data.P1, image_size, CV_32FC1, reproj_maps_L.mapx, reproj_maps_L.mapy);
+    cv::initUndistortRectifyMap(camR_calib_data.intrinsic, camR_calib_data.distorsion,
+                                stereo_calib_data.R2, stereo_calib_data.P2, image_size, CV_32FC1, reproj_maps_R.mapx, reproj_maps_R.mapy);
+
+    return true;
+}
+
+/**
+ * @brief Remap images using the provided re-projection maps.
+ * @param [in] original_images: Vector of images to be remapped
+ * @param [in] reproj_maps: Structure containing re-projection maps (see Calibration::ReprojMaps)
+ * @param [out] remapped_images: Vector of remapped images
+ * @return True if the remapping completed successfuly
+ */
+bool remap_images(std::vector<cv::Mat>& original_images, ReprojMaps &reproj_maps, std::vector<cv::Mat>& remapped_images)
+{
+    // Exit if missing arguements
+    if(reproj_maps.mapx.empty() || reproj_maps.mapy.empty() || original_images.empty())
+        return false;
+
+    // Empty the output vector
+    remapped_images.clear();
+
+    // Remap all images from the input vector
+    for(unsigned int i_image=0; i_image<original_images.size(); i_image++) {
+        cv::Mat remapped_image;
+        cv::remap(original_images[i_image], remapped_image, reproj_maps.mapx, reproj_maps.mapy, cv::INTER_NEAREST, cv::BORDER_CONSTANT, cv::Scalar());
+        remapped_images.push_back(remapped_image);
     }
 
     return true;

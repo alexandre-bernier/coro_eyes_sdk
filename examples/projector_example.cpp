@@ -222,9 +222,9 @@ int main(void)
 
     projector.GetColumns(&proj_width);
 
-    StructuredLightPatterns patterns(proj_height, proj_width);
+    StructuredLight structured_light(proj_height, proj_width);
 
-    patterns.generate_gray_code_patterns();
+    structured_light.generate_gray_code_patterns();
 
     // [Generate patterns]
 
@@ -236,7 +236,7 @@ int main(void)
      */
     // [Visualize patterns]
 
-    patterns.visualize_patterns();
+    structured_light.visualize_patterns();
 
     // [Visualize patterns]
 
@@ -256,6 +256,10 @@ int main(void)
     upload_patterns_param.Set(dlp::DLP_Platform::Parameters::SequencePrepared(!upload_patterns));
 
     projector.Setup(upload_patterns_param);
+
+    if(upload_patterns)
+
+        cout << "Patterns will be uploaded to the projector..." << endl;
 
     // [Upload parameter]
 
@@ -287,9 +291,19 @@ int main(void)
      */
     // [Prepare patterns]
 
-    cout << "Sending patterns to projector..." << endl;
+    cout << "Preparing patterns..." << endl;
 
-    projector.PreparePatternSequence(*patterns.get_dlp_patterns());
+    dlp::Pattern::Sequence dlp_pattern_sequence;
+
+    if(structured_light.get_pattern_type() == StructuredLight::PatternType::GrayCode)
+
+        dlp_pattern_sequence = convert_gray_code_cv_patterns_to_dlp(structured_light.get_pattern_images());
+
+    else if(structured_light.get_pattern_type() == StructuredLight::PatternType::Sinusoidal)
+
+        dlp_pattern_sequence = convert_sinusoidal_cv_patterns_to_dlp(structured_light.get_pattern_images());
+
+    projector.PreparePatternSequence(dlp_pattern_sequence);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1500));    // Wait to allow the print_progress_thread to finish properly
 
@@ -304,7 +318,7 @@ int main(void)
 
     cout << "Projecting patterns..." << endl;
 
-    projector.StartPatternSequence(0, patterns.get_nb_patterns(), false);
+    projector.StartPatternSequence(0, structured_light.get_nb_patterns(), false);
 
     // [Project patterns]
 
@@ -319,7 +333,7 @@ int main(void)
 
     param.Get(&sequence_period);
 
-    unsigned int sequence_duration = sequence_period.Get() * patterns.get_nb_patterns();
+    unsigned int sequence_duration = sequence_period.Get() * structured_light.get_nb_patterns();
 
     std::this_thread::sleep_for(std::chrono::microseconds((unsigned int)((float)sequence_duration*1.2)));
 

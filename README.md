@@ -85,3 +85,4 @@ You can find multiple examples on how to use this SDK in the examples/ directory
 - examples/projector_example.cpp
 - examples/camera_example.cpp
 - examples/camera_calibration_example.cpp
+- examples/point_cloud_example.cpp
