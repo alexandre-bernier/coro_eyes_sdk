@@ -21,7 +21,7 @@ The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following dependency 
 | Dependencies | Version |
 | --- | --- |
 | CMake | 3.21.3 |
-| OpenCv | 4.2.0 |
+| OpenCV | 4.2.0 |
 | hidapi | 0.9.0 |
 | libusb | 1.0.23 |
 | udev | 245.4 |
