@@ -24,4 +24,4 @@ list(APPEND CAMERA_INCLUDE_DIRS ${PG_FLYCAP_INCLUDE_DIRS})
 # Build
 add_library(camera ${CAMERA_SRC})
 target_include_directories(camera PUBLIC ${CAMERA_INCLUDE_DIRS})
-target_link_libraries(camera ${PG_FLYCAP_LIB} ${PG_FLYCAP_LIB_C} ${OpenCV_LIBS})
+target_link_libraries(camera PRIVATE ${PG_FLYCAP_LIB} ${PG_FLYCAP_LIB_C} ${OpenCV_LIBS})

@@ -40,4 +40,4 @@ list(APPEND PROJECTOR_INCLUDE_DIRS ${HIDAPI_INCLUDE_DIRS})
 # Build
 add_library(projector ${PROJECTOR_SRC})
 target_include_directories(projector PUBLIC ${PROJECTOR_INCLUDE_DIRS})
-target_link_libraries(projector ${OpenCV_LIBS} ${HIDAPI_LIBS})
+target_link_libraries(projector PRIVATE ${OpenCV_LIBS} ${HIDAPI_LIBS})
