@@ -10,6 +10,5 @@
 #include "camera_calibration.h"
 #include "projector.h"
 #include "structured_light.h"
-#include "point_cloud.h"
 
 #endif // _CORO_EYES_SDK_H

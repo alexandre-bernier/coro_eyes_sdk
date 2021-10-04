@@ -9,7 +9,6 @@ link_directories(${OpenCV_LIBRARY_DIRS})
 add_subdirectory(camera)
 add_subdirectory(projector)
 add_subdirectory(structured_light)
-add_subdirectory(point_cloud)
 
 # Libraries include dir and libs
 set(CORO_EYES_SDK_INCLUDE_DIRS
@@ -17,13 +16,11 @@ set(CORO_EYES_SDK_INCLUDE_DIRS
     ${CAMERA_INCLUDE_DIRS}
     ${PROJECTOR_INCLUDE_DIRS}
     ${STRUCTURED_LIGHT_INCLUDE_DIRS}
-    ${POINT_CLOUD_INCLUDE_DIRS}
     CACHE INTERNAL "")
 set(CORO_EYES_SDK_LIBS
     camera
     projector
     structured_light
-    point_cloud
     CACHE INTERNAL "")
 
 # Build SDK
@@ -31,3 +28,7 @@ add_library(CORO_EYES_SDK ${CORO_EYES_SDK_LIBS})
 add_dependencies(CORO_EYES_SDK ${CORO_EYES_SDK_LIBS})
 target_include_directories(CORO_EYES_SDK PUBLIC ${CORO_EYES_SDK_INCLUDE_DIRS})
 target_link_libraries(CORO_EYES_SDK ${CORO_EYES_SDK_LIBS})
+
+# Install
+install(TARGETS CORO_EYES_SDK DESTINATION lib)
+install(FILES ${PROJECT_SOURCE_DIR}/include/coro_eyes_sdk.h DESTINATION include)

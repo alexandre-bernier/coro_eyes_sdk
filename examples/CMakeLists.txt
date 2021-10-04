@@ -29,9 +29,3 @@ add_executable(structured_light_example structured_light_example.cpp)
 add_dependencies(structured_light_example CORO_EYES_SDK)
 target_include_directories(structured_light_example PUBLIC ${CORO_EYES_SDK_INCLUDE_DIRS})
 target_link_libraries(structured_light_example ${CORO_EYES_SDK_LIBS} Threads::Threads)
-
-## Point cloud example
-add_executable(point_cloud_example point_cloud_example.cpp)
-add_dependencies(point_cloud_example CORO_EYES_SDK)
-target_include_directories(point_cloud_example PUBLIC ${CORO_EYES_SDK_INCLUDE_DIRS})
-target_link_libraries(point_cloud_example ${CORO_EYES_SDK_LIBS})
