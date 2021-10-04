@@ -4,6 +4,9 @@ file(COPY ../resources DESTINATION ${CMAKE_BINARY_DIR})
 # Dependencies
 ## Threads
 find_package(Threads REQUIRED)
+if(Threads_FOUND)
+    message(STATUS "Threads found")
+endif()
 
 # Build
 ## Projector example

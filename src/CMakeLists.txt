@@ -1,7 +1,9 @@
 # Common dependencies
-find_package(OpenCV REQUIRED)
-if(NOT OpenCV_FOUND)
-    message(FATAL_ERROR "Can't find OpenCV.")
+find_package(OpenCV 4 REQUIRED)
+if(OpenCV_FOUND)
+    message(STATUS "OpenCV found")
+else()
+    message(FATAL_ERROR "Can't find OpenCV 4")
 endif()
 link_directories(${OpenCV_LIBRARY_DIRS})
 
