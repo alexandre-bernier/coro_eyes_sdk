@@ -34,7 +34,7 @@ public:
     bool compute_disparity_map(std::vector<std::vector<cv::Mat> > captured_images, cv::Mat& disparity_map);
     cv::Mat apply_color_to_disparity_map(const cv::Mat &disparity_map);
 
-    cv::Mat compute_point_cloud(cv::Mat disparity_map, const cv::Mat& Q);
+    std::vector<cv::Point3f> compute_point_cloud(cv::Mat disparity_map, const cv::Mat& Q);
 
 private:
     PatternType _pattern_type_generated = PatternType::None;

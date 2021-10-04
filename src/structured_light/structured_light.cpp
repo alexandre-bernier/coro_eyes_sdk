@@ -3,9 +3,9 @@
  *  @copyright BSD-3-Clause License
  */
 
-#include "structured_light.h"
-#include <iostream>
+#include <mutex>
 #include <opencv2/highgui.hpp>
+#include "structured_light.h"
 
 /**
  * @warning The number of cameras shouldn't exceed 2.
@@ -224,13 +224,12 @@ cv::Mat StructuredLight::apply_color_to_disparity_map(const cv::Mat& disparity_m
  * @param Q: Disparity-to-depth mapping matrix (see Calibration::StereoData and Calibration::run_stereo_calibration)
  * @return A point cloud
  */
-cv::Mat StructuredLight::compute_point_cloud(cv::Mat disparity_map, const cv::Mat& Q)
+std::vector<cv::Point3f> StructuredLight::compute_point_cloud(cv::Mat disparity_map, const cv::Mat& Q)
 {
     // Compute point cloud
-    cv::Mat point_cloud;
-
+    cv::Mat point_cloud_image;
     disparity_map.convertTo(disparity_map, CV_32FC1);
-    cv::reprojectImageTo3D(disparity_map, point_cloud, Q, true, -1);
+    cv::reprojectImageTo3D(disparity_map, point_cloud_image, Q, true, -1);
 
     // Compute mask to remove the background
     double min, max;
@@ -243,7 +242,19 @@ cv::Mat StructuredLight::compute_point_cloud(cv::Mat disparity_map, const cv::Ma
 
     // Apply mask to the point cloud
     cv::Mat point_cloud_tresh;
-    point_cloud.copyTo(point_cloud_tresh, thresholded_disp);
+    point_cloud_image.copyTo(point_cloud_tresh, thresholded_disp);
 
-    return point_cloud_tresh;
+    // Remove points at origin
+    std::vector<cv::Point3f> point_cloud;
+    point_cloud.reserve(thresholded_disp.size().width * thresholded_disp.size().height);    // Reserving the maximum size possible because we get a SegFault when the lambda functor tries to reallocate the vector
+
+    std::mutex pixel_mutex;
+    point_cloud_tresh.forEach<cv::Point3f>([&](cv::Point3f &point, const int *position) -> void {
+        if(point.x != 0.0 && point.y != 0.0 && point.z != 0.0) {
+            const std::lock_guard<std::mutex> lock(pixel_mutex);    // Must lock when pushing into the vector, because cv::Mat::ForEach runs in parallel
+            point_cloud.push_back(cv::Point3f(point.x, point.y, point.z));
+        }
+    });
+
+    return point_cloud;
 }

@@ -852,7 +852,7 @@ int main(void)
 
     cout << "Computing point cloud..." << endl;
 
-    cv::Mat point_cloud = structured_light.compute_point_cloud(disparity_map, stereo_calib_data.Q);
+    std::vector<cv::Point3f> point_cloud = structured_light.compute_point_cloud(disparity_map, stereo_calib_data.Q);
 
     // [Compute point cloud]
 
@@ -863,15 +863,11 @@ int main(void)
      */
     // [Save point cloud]
 
-#ifdef HAVE_OPENCV_VIZ
-
     cout << "Saving point cloud..." << endl;
 
     string point_cloud_file_name = "./point_cloud.ply";
 
     cv::viz::writeCloud(point_cloud_file_name, point_cloud);
-
-#endif
 
     // [Save point cloud]
 
