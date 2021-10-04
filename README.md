@@ -54,6 +54,7 @@ The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following dependency 
 ### Building from source
 
     git clone https://github.com/alexandre-bernier/coro_eyes_sdk.git
+    cd coro_eyes_sdk/
     mkdir build
     cd build/
     cmake ..
