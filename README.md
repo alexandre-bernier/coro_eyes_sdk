@@ -57,7 +57,7 @@ The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following dependency 
     cd coro_eyes_sdk/
     mkdir build
     cd build/
-    cmake ..
+    cmake BUILD_EXAMPLES=ON BUILD_DOC=ON ..
     sudo cmake --build . --config Release --target install
     
 ### udev rules
