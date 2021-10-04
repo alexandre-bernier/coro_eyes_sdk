@@ -62,15 +62,15 @@ The coro_eyes_sdk has been tested on Ubuntu 20.04 with the following dependency 
     
 ### udev rules
 
-Once udev is installed, you can run the [udev configuration script](install/configure_udev_rule.sh) with sudo to create the udev rules automatically.
+Once udev is installed, you can run the [udev configuration script](scripts/configure_udev_rule.sh) with sudo to create the udev rules automatically.
 
-    sudo install/configure_udev_rule.sh
+    sudo scripts/configure_udev_rule.sh
     
 ### USBFS memory allocation
 
-Make sure to run the [USBFS configuration script](install/configure_usbfs.sh) with sudo to increase the USBFS memory allocation (especially if you intend to run more than one camera at the same time).
+Make sure to run the [USBFS configuration script](scripts/configure_usbfs.sh) with sudo to increase the USBFS memory allocation (especially if you intend to run more than one camera at the same time).
 
-    sudo install/configure_usbfs.sh
+    sudo scripts/configure_usbfs.sh
     
 To verify that the script worked, restart your computer and run the following command in a terminal (you should see `1000` as a result):
 
