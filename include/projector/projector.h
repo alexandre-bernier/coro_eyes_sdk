@@ -5,8 +5,8 @@
 #ifndef _PROJECTOR_H
 #define _PROJECTOR_H
 
-#include "common/returncode.hpp"
-#include "dlp_platforms/lightcrafter_4500/lcr4500.hpp"
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/lcr4500.hpp>
 
 /**
  * @brief Create a DLP pattern sequence from a series of gray code OpenCV patterns.

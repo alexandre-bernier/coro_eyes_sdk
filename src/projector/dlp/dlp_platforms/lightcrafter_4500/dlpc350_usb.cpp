@@ -41,7 +41,7 @@
 #include <cstring>
 
 #include <hidapi.h>
-#include <dlp_platforms/lightcrafter_4500/dlpc350_usb.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/dlpc350_usb.hpp>
 
 /***************************************************
 *                  GLOBAL VARIABLES

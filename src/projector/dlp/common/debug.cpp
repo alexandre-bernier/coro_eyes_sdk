@@ -3,8 +3,8 @@
  *  @copyright 2014 Texas Instruments Incorporated - http://www.ti.com/ ALL RIGHTS RESERVED
  */
 
-#include <common/debug.hpp>
-#include <common/other.hpp>
+#include <projector/dlp/common/debug.hpp>
+#include <projector/dlp/common/other.hpp>
 
 #include <iostream>
 #include <fstream>

@@ -3,8 +3,8 @@
  *  @copyright 2014 Texas Instruments Incorporated - http://www.ti.com/ ALL RIGHTS RESERVED
  */
 
-#include <common/returncode.hpp>
-#include <common/other.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/other.hpp>
 
 #include <vector>
 #include <string>

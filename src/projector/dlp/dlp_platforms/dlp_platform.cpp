@@ -5,13 +5,13 @@
 
 #include <iostream>
 
-#include <common/debug.hpp>
-#include <common/returncode.hpp>
-#include <common/image/image.hpp>
-#include <common/other.hpp>
-#include <common/parameters.hpp>
+#include <projector/dlp/common/debug.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/image/image.hpp>
+#include <projector/dlp/common/other.hpp>
+#include <projector/dlp/common/parameters.hpp>
 
-#include <dlp_platforms/dlp_platform.hpp>
+#include <projector/dlp/dlp_platforms/dlp_platform.hpp>
 
 /** @brief  Contains all DLP SDK classes, functions, etc. */
 namespace dlp{

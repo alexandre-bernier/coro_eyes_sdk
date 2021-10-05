@@ -7,9 +7,9 @@
 #ifndef DLP_SDK_PARAMETERS_HPP
 #define DLP_SDK_PARAMETERS_HPP
 
-#include <common/debug.hpp>
-#include <common/returncode.hpp>
-#include <common/other.hpp>
+#include <projector/dlp/common/debug.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/other.hpp>
 
 #include <iostream>
 #include <string>

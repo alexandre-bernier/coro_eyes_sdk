@@ -7,8 +7,8 @@
 #ifndef DLP_SDK_MODULE_HPP
 #define DLP_SDK_MODULE_HPP
 
-#include <common/returncode.hpp>
-#include <common/parameters.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/parameters.hpp>
 
 namespace dlp{
 

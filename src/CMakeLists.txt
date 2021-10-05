@@ -1,3 +1,10 @@
+# Install directories
+set(CoRo_Eyes_SDK_INSTALL_INCLUDE_DIR include/${CMAKE_PROJECT_NAME})
+set(CoRo_Eyes_SDK_INSTALL_LIB_DIR lib/${CMAKE_PROJECT_NAME})
+
+# Version config file
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}Config.h.in ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.h)
+
 # Common dependencies
 find_package(OpenCV 4 REQUIRED)
 if(OpenCV_FOUND)
@@ -5,44 +12,71 @@ if(OpenCV_FOUND)
 else()
     message(FATAL_ERROR "Can't find OpenCV 4")
 endif()
-link_directories(${OpenCV_LIBRARY_DIRS})
+set(EXTRA_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS})
+set(EXTRA_LIBS ${OpenCV_LIBS})
 
 # Subdirectories
 add_subdirectory(camera)
 add_subdirectory(projector)
 add_subdirectory(structured_light)
 
-# Libraries include dir and libs
-set(CORO_EYES_SDK_INCLUDE_DIRS
-    ${PROJECT_SOURCE_DIR}/include
+# Libraries source, include dir and libs
+set(_CoRo_Eyes_SDK_SRC
+    ${CAMERA_SRC}
+    ${PROJECTOR_SRC}
+    ${STRUCTURED_LIGHT_SRC})
+set(_CoRo_Eyes_SDK_INCLUDE_DIRS
     ${CAMERA_INCLUDE_DIRS}
     ${PROJECTOR_INCLUDE_DIRS}
-    ${STRUCTURED_LIGHT_INCLUDE_DIRS}
-    CACHE INTERNAL "")
-set(CORO_EYES_SDK_LIBS
-    camera
-    projector
-    structured_light
-    CACHE INTERNAL "")
+    ${STRUCTURED_LIGHT_INCLUDE_DIRS})
+set(_CoRo_Eyes_SDK_LIBS
+    ${CAMERA_LIBS}
+    ${PROJECTOR_LIBS}
+    ${STRUCTURED_LIGHT_LIBS})
 
 # Build SDK
-add_library(CORO_EYES_SDK ${CORO_EYES_SDK_LIBS})
-add_dependencies(CORO_EYES_SDK ${CORO_EYES_SDK_LIBS})
-target_include_directories(CORO_EYES_SDK PUBLIC ${CORO_EYES_SDK_INCLUDE_DIRS})
-target_link_libraries(CORO_EYES_SDK ${CORO_EYES_SDK_LIBS})
+add_library(${CMAKE_PROJECT_NAME} ${_CoRo_Eyes_SDK_SRC})
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CoRo_Eyes_SDK_INSTALL_INCLUDE_DIR}>
+    PUBLIC ${EXTRA_INCLUDE_DIRS}
+    PRIVATE ${_CoRo_Eyes_SDK_INCLUDE_DIRS})
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    PUBLIC ${EXTRA_LIBS}
+    PRIVATE ${_CoRo_Eyes_SDK_LIBS})
 
 # Install target
-install(TARGETS CORO_EYES_SDK DESTINATION lib)
-install(FILES ${PROJECT_SOURCE_DIR}/include/coro_eyes_sdk.h DESTINATION include)
+install(TARGETS CoRo_Eyes_SDK
+    DESTINATION "${CoRo_Eyes_SDK_INSTALL_LIB_DIR}"
+    EXPORT CoRo_Eyes_SDKTargets)
 
-# Uninstall target
-if(NOT TARGET uninstall)
-  configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include//
+    DESTINATION ${CoRo_Eyes_SDK_INSTALL_INCLUDE_DIR})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.h
+    DESTINATION ${CoRo_Eyes_SDK_INSTALL_INCLUDE_DIR})
 
-  add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-endif()
+install(EXPORT CoRo_Eyes_SDKTargets
+    FILE "CoRo_Eyes_SDKTargets.cmake"
+    DESTINATION "lib/cmake/${CMAKE_PROJECT_NAME}")
 
+include(CMakePackageConfigHelpers)
+# generate the config file that includes the exports
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}Config.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION "lib/cmake/${CMAKE_PROJECT_NAME}"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+# generate the version file for the config file
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake"
+    VERSION "${CoRo_Eyes_SDK_VERSION_MAJOR}.${CoRo_Eyes_SDK_VERSION_MINOR}"
+    COMPATIBILITY AnyNewerVersion)
+
+# install the configuration file
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION "lib/cmake/${CMAKE_PROJECT_NAME}")
+
+export(EXPORT CoRo_Eyes_SDKTargets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_PROJECT_NAME}Targets.cmake")

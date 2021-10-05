@@ -6,14 +6,14 @@
 #ifndef DLP_SDK_DLP_PLATFORM_HPP
 #define DLP_SDK_DLP_PLATFORM_HPP
 
-#include <common/returncode.hpp>
-#include <common/debug.hpp>
-#include <common/other.hpp>
-#include <common/image/image.hpp>
-#include <common/pattern/pattern.hpp>
-#include <common/parameters.hpp>
-#include <common/module.hpp>
-#include <common/pixel_array_configuration.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/debug.hpp>
+#include <projector/dlp/common/other.hpp>
+#include <projector/dlp/common/image/image.hpp>
+#include <projector/dlp/common/pattern/pattern.hpp>
+#include <projector/dlp/common/parameters.hpp>
+#include <projector/dlp/common/module.hpp>
+#include <projector/dlp/common/pixel_array_configuration.hpp>
 
 #include <iostream>
 

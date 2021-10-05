@@ -39,7 +39,7 @@
 #ifndef DLPC350_FIRMWARE_H
 #define DLPC350_FIRMWARE_H
 
-#include <dlp_platforms/lightcrafter_4500/common.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/common.hpp>
 
 #define RELEASE_FW_VERSION  0x030000        // update for new DLPC350 binaries
 

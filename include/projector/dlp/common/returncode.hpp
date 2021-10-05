@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include <common/other.hpp>
+#include <projector/dlp/common/other.hpp>
 
 /** @brief  Contains all DLP SDK classes, functions, etc. */
 namespace dlp{

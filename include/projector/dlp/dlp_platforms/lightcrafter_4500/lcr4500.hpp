@@ -9,14 +9,14 @@
 #include <atomic>
 #include <string>
 
-#include <common/returncode.hpp>
-#include <common/other.hpp>
-#include <common/parameters.hpp>
-#include <common/pattern/pattern.hpp>
-#include <common/image/image.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/other.hpp>
+#include <projector/dlp/common/parameters.hpp>
+#include <projector/dlp/common/pattern/pattern.hpp>
+#include <projector/dlp/common/image/image.hpp>
 
-#include <dlp_platforms/dlp_platform.hpp>
-#include <dlp_platforms/lightcrafter_4500/flashdevice.hpp>
+#include <projector/dlp/dlp_platforms/dlp_platform.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/flashdevice.hpp>
 
 #define LCR4500_FLASH_FW_VERSION_ADDRESS    0xF902C000
 

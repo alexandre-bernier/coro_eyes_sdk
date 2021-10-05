@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <flycapture/Error.h>
-#include "camera.h"
+#include "camera/camera.h"
 
 #include <opencv2/highgui.hpp>
 

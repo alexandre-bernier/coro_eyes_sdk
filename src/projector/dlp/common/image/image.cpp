@@ -7,10 +7,10 @@
 #include <vector>
 #include <iostream>
 
-#include <common/returncode.hpp>
-#include <common/debug.hpp>
-#include <common/other.hpp>
-#include <common/image/image.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/debug.hpp>
+#include <projector/dlp/common/other.hpp>
+#include <projector/dlp/common/image/image.hpp>
 
 #include <opencv2/opencv.hpp>
 

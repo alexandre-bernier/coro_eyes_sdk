@@ -1,29 +1,4 @@
-# Source files
-set(PROJECTOR_INCLUDE_DIRS
-    ${PROJECT_SOURCE_DIR}/include/projector
-    ${PROJECT_SOURCE_DIR}/include/projector/dlp
-    CACHE INTERNAL "")
-
-set(PROJECTOR_SRC
-    dlp/common/debug.cpp
-    dlp/common/module.cpp
-    dlp/common/other.cpp
-    dlp/common/parameters.cpp
-    dlp/common/returncode.cpp
-    dlp/common/image/image.cpp
-    dlp/common/pattern/pattern.cpp
-    dlp/common/pattern/pattern_sequence.cpp
-    dlp/dlp_platforms/dlp_platform.cpp
-    dlp/dlp_platforms/lightcrafter_4500/common.cpp
-    dlp/dlp_platforms/lightcrafter_4500/dlpc350_api.cpp
-    dlp/dlp_platforms/lightcrafter_4500/dlpc350_firmware.cpp
-    dlp/dlp_platforms/lightcrafter_4500/dlpc350_usb.cpp
-    dlp/dlp_platforms/lightcrafter_4500/lcr4500.cpp)
-
 # Dependencies
-## OpenCV
-list(APPEND PROJECTOR_INCLUDE_DIRS ${OpenCV_INCLUDE_DIRS})
-
 ## hidapi
 find_path(LIBHIDAPI-LIBUSB_INCLUDE_DIR hidapi.h /usr/include/hidapi)
 find_library(LIBHIDAPI-LIBUSB_LIBRARY hidapi-libusb)
@@ -37,9 +12,31 @@ else()
     message(FATAL_ERROR "HIDAPI not found")
 endif()
 
-list(APPEND PROJECTOR_INCLUDE_DIRS ${HIDAPI_INCLUDE_DIRS})
+# Source files
+set(PROJECTOR_INCLUDE_DIRS
+#    ${PROJECT_SOURCE_DIR}/include/projector
+#    ${PROJECT_SOURCE_DIR}/include/projector/dlp
+    ${HIDAPI_INCLUDE_DIRS}
+    CACHE INTERNAL "")
 
-# Build
-add_library(projector ${PROJECTOR_SRC})
-target_include_directories(projector PUBLIC ${PROJECTOR_INCLUDE_DIRS})
-target_link_libraries(projector PRIVATE ${OpenCV_LIBS} ${HIDAPI_LIBS})
+set(PROJECTOR_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/common/debug.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/common/module.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/common/other.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/common/parameters.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/common/returncode.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/common/image/image.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/common/pattern/pattern.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/common/pattern/pattern_sequence.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/dlp_platforms/dlp_platform.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/dlp_platforms/lightcrafter_4500/common.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/dlp_platforms/lightcrafter_4500/dlpc350_api.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/dlp_platforms/lightcrafter_4500/dlpc350_firmware.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/dlp_platforms/lightcrafter_4500/dlpc350_usb.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dlp/dlp_platforms/lightcrafter_4500/lcr4500.cpp
+    CACHE INTERNAL "")
+
+# Libraries
+set(PROJECTOR_LIBS
+    ${HIDAPI_LIBS}
+    CACHE INTERNAL "")

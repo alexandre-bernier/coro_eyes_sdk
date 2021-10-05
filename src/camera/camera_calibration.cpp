@@ -8,7 +8,7 @@
 #include <sstream>
 #include <ctime>
 #include <cstdio>
-#include "camera_calibration.h"
+#include "camera/camera_calibration.h"
 
 /**
  * @brief Calculate the real board corners' position

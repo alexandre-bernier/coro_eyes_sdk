@@ -5,7 +5,7 @@
  */
 
 #include <iostream>
-#include "coro_eyes_sdk.h"
+#include "CoRo_Eyes_SDK.h"
 
 using namespace std;
 
@@ -192,6 +192,23 @@ int main(void)
     }
 
     // [CoRo Eyes properties]
+
+
+    /**
+     * @section other_properties Overwriting some properties to make it work without the projector
+     * @snippet camera_example.cpp Other properties
+     */
+    // [Other properties]
+
+    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
+
+        camera[i_cam].set_camera_trigger(false);
+
+        camera[i_cam].set_shutter_speed(8.0);
+
+    }
+
+    // [Other properties]
 
 
     /**

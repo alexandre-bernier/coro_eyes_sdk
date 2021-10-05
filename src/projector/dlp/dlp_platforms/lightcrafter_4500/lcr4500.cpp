@@ -3,12 +3,12 @@
  *  @copyright 2014 Texas Instruments Incorporated - http://www.ti.com/ ALL RIGHTS RESERVED
  */
 
-#include <common/returncode.hpp>
-#include <common/debug.hpp>
-#include <common/other.hpp>
-#include <common/image/image.hpp>
-#include <common/parameters.hpp>
-#include <common/pattern/pattern.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/debug.hpp>
+#include <projector/dlp/common/other.hpp>
+#include <projector/dlp/common/image/image.hpp>
+#include <projector/dlp/common/parameters.hpp>
+#include <projector/dlp/common/pattern/pattern.hpp>
 
 #include <vector>
 #include <fstream>
@@ -19,14 +19,14 @@
 
 #include <ctime>
 
-#include <dlp_platforms/lightcrafter_4500/common.hpp>
-#include <dlp_platforms/lightcrafter_4500/error.hpp>
-#include <dlp_platforms/lightcrafter_4500/dlpc350_usb.hpp>
-#include <dlp_platforms/lightcrafter_4500/dlpc350_firmware.hpp>
-#include <dlp_platforms/lightcrafter_4500/flashdevice.hpp>
-#include <dlp_platforms/lightcrafter_4500/dlpc350_api.hpp>
-#include <dlp_platforms/dlp_platform.hpp>
-#include <dlp_platforms/lightcrafter_4500/lcr4500.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/common.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/error.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/dlpc350_usb.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/dlpc350_firmware.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/flashdevice.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/dlpc350_api.hpp>
+#include <projector/dlp/dlp_platforms/dlp_platform.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/lcr4500.hpp>
 
 /** @brief  Contains all DLP SDK classes, functions, etc. */
 namespace dlp{

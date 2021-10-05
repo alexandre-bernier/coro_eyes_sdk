@@ -7,9 +7,9 @@
 #ifndef DLP_SDK_IMAGE_HPP
 #define DLP_SDK_IMAGE_HPP
 
-#include <common/returncode.hpp>
-#include <common/debug.hpp>
-#include <common/other.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/debug.hpp>
+#include <projector/dlp/common/other.hpp>
 
 #include <opencv2/opencv.hpp>
 

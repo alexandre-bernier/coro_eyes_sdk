@@ -8,10 +8,10 @@
 #include <vector>
 #include <fstream>
 
-#include <common/debug.hpp>
-#include <common/returncode.hpp>
-#include <common/other.hpp>
-#include <common/parameters.hpp>
+#include <projector/dlp/common/debug.hpp>
+#include <projector/dlp/common/returncode.hpp>
+#include <projector/dlp/common/other.hpp>
+#include <projector/dlp/common/parameters.hpp>
 
 /** @brief  Contains all DLP SDK classes, functions, etc. */
 namespace dlp{

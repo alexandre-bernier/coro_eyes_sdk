@@ -5,7 +5,7 @@
 
 #include <mutex>
 #include <opencv2/highgui.hpp>
-#include "structured_light.h"
+#include "structured_light/structured_light.h"
 
 /**
  * @warning The number of cameras shouldn't exceed 2.

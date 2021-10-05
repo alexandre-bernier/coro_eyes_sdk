@@ -7,7 +7,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include "coro_eyes_sdk.h"
+#include "CoRo_Eyes_SDK.h"
 
 using namespace std;
 

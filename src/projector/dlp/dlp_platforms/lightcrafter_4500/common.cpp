@@ -36,8 +36,8 @@
  *
 */
 
-#include <dlp_platforms/lightcrafter_4500/error.hpp>
-#include <dlp_platforms/lightcrafter_4500/common.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/error.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/common.hpp>
 
 /******************************* MACROS **************************************/
 /**************************** LOCAL TYPES ************************************/

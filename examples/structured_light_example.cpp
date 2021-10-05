@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <thread>
-#include "coro_eyes_sdk.h"
+#include "CoRo_Eyes_SDK.h"
 
 using namespace std;
 

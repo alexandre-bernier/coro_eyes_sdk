@@ -42,9 +42,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <dlp_platforms/lightcrafter_4500/common.hpp>
-#include <dlp_platforms/lightcrafter_4500/dlpc350_api.hpp>
-#include <dlp_platforms/lightcrafter_4500/dlpc350_usb.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/common.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/dlpc350_api.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/dlpc350_usb.hpp>
 
 extern unsigned char g_OutputBuffer[];
 extern unsigned char g_InputBuffer[];

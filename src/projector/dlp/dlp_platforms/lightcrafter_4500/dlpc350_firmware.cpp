@@ -41,9 +41,9 @@
 #include <ctype.h>
 #include <string.h>
 
-#include <dlp_platforms/lightcrafter_4500/dlpc350_firmware.hpp>
-#include <dlp_platforms/lightcrafter_4500/common.hpp>
-#include <dlp_platforms/lightcrafter_4500/error.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/dlpc350_firmware.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/common.hpp>
+#include <projector/dlp/dlp_platforms/lightcrafter_4500/error.hpp>
 
 
 
