@@ -11,34 +11,6 @@
 
 using namespace std;
 
-/**
- * @brief Structure used as a callback argument.
- */
-struct FrameInfo {
-    std::string cv_window_name; ///< Name of the OpenCV window where the received frame should be displayed
-    unsigned int image_height;  ///< Height of the image in pixels
-    unsigned int image_width;   ///< Width of the image in pixels
-};
-
-/**
- * @brief Callback to display a new frame in a camera feed.
- * @param frame Pointer to the last frame received in OpenCV format
- * @param callback_data Pointer to a FrameInfo
- */
-void camera_feed_callback(cv::Mat frame, void *callback_data)
-{
-    // Typecast callback data
-    FrameInfo frame_info = *(FrameInfo*)callback_data;
-
-    // Rescale image
-    float scale_factor = 0.5;
-    cv::Mat rescaled_frame;
-    cv::resize(frame, rescaled_frame, cv::Size(frame_info.image_width*scale_factor, frame_info.image_height*scale_factor));
-
-    // Show the frame in the appropriate window
-    cv::imshow(frame_info.cv_window_name, rescaled_frame);
-}
-
 int main(void)
 {
     /**
@@ -249,33 +221,6 @@ int main(void)
 
 
     /**
-     * @section feeds Setup camera feeds
-     * @snippet camera_calibration_example.cpp Camera feeds
-     */
-    // [Camera feeds]
-
-//    cout << "Starting up camera feeds..." << endl;
-
-//    FrameInfo frame_info[num_cameras];
-
-//    for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
-
-//        frame_info[i_cam].cv_window_name = "Camera " + std::to_string(i_cam);
-
-//        frame_info[i_cam].image_height = camera[i_cam].get_camera_height();
-
-//        frame_info[i_cam].image_width = camera[i_cam].get_camera_width();
-
-//        cv::namedWindow(frame_info[i_cam].cv_window_name, cv::WINDOW_AUTOSIZE);
-
-//        camera[i_cam].set_new_frame_callback(camera_feed_callback, &frame_info[i_cam]);
-
-//    }
-
-    // [Camera feeds]
-
-
-    /**
      * @section start_capture Start capturing with cameras
      * @snippet camera_calibration_example.cpp Start capture
      */
@@ -327,8 +272,6 @@ int main(void)
             cout << endl;
 
             cout << "Press any key to capture the chessboard." << endl;
-
-//            cv::waitKey();
 
             do {
 
