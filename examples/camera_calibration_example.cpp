@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
-#include "CoRo_Eyes_SDK.h"
+#include "coro_eyes_sdk.h"
 
 using namespace std;
 

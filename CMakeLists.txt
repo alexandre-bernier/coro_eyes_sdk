@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(CoRo_Eyes_SDK VERSION 1.0 LANGUAGES CXX)
+project(coro_eyes_sdk VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
