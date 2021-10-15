@@ -252,7 +252,7 @@ std::vector<cv::Point3f> StructuredLight::compute_point_cloud(cv::Mat disparity_
     point_cloud_tresh.forEach<cv::Point3f>([&](cv::Point3f &point, const int *position) -> void {
         if(point.x != 0.0 && point.y != 0.0 && point.z != 0.0) {
             const std::lock_guard<std::mutex> lock(pixel_mutex);    // Must lock when pushing into the vector, because cv::Mat::ForEach runs in parallel
-            point_cloud.push_back(cv::Point3f(point.x, point.y, point.z));
+            point_cloud.push_back(cv::Point3f(point.x/1000.0, point.y/1000.0, point.z/1000.0));
         }
     });
 
