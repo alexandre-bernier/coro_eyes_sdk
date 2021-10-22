@@ -88,6 +88,11 @@ struct ReprojMaps {
     cv::Mat mapx, mapy;
 };
 
+struct Pose {
+    std::string frame;
+    double translation[3], quaternions[4];
+};
+
 bool find_corners(Settings& s, cv::Mat& image, std::vector<cv::Point2f>& image_points);
 
 bool run_camera_calibration(Settings& s, cv::Size image_size, Data& calib_data, std::vector<std::vector<cv::Point2f> > &image_points);
@@ -106,6 +111,10 @@ bool calculate_stereo_reproj_maps(Data& camL_calib_data, Data& camR_calib_data, 
                                   ReprojMaps& reproj_maps_L, ReprojMaps& reproj_maps_R);
 
 bool remap_images(std::vector<cv::Mat> &original_images, ReprojMaps &reproj_maps, std::vector<cv::Mat> &remapped_images);
+
+bool run_pose_estimation(Data& calib_data, std::vector<cv::Point3f>& object_points,
+                         std::vector<cv::Point2f>& image_points, Pose& pose_data);
+bool save_pose_estimation(std::string file_name, Pose& pose_data);
 };
 
 #endif // _CAMERA_CALIBRATION_H

@@ -24,3 +24,7 @@ target_link_libraries(camera_calibration_example coro_eyes_sdk)
 ## Structured light example
 add_executable(structured_light_example structured_light_example.cpp)
 target_link_libraries(structured_light_example coro_eyes_sdk Threads::Threads)
+
+## Pose estimation example
+add_executable(pose_estimation_example pose_estimation_example.cpp)
+target_link_libraries(pose_estimation_example coro_eyes_sdk)

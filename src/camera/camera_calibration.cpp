@@ -84,6 +84,42 @@ double computeReprojectionErrors(const std::vector<std::vector<cv::Point3f> >& o
     return std::sqrt(totalErr/totalPoints);
 }
 
+/**
+ * @brief Convert an OpenCV rotation matrix into quaternions.
+ * @details Taken from https://gist.github.com/shubh-agrawal/76754b9bfb0f4143819dbd146d15d4c8
+ * @param R: Rotation matrix of type cv::Mat
+ * @param Q: Quaternions of type double[4]
+ */
+void getQuaternion(cv::Mat R, double Q[])
+{
+    double trace = R.at<double>(0,0) + R.at<double>(1,1) + R.at<double>(2,2);
+
+    if (trace > 0.0)
+    {
+        double s = sqrt(trace + 1.0);
+        Q[3] = (s * 0.5);
+        s = 0.5 / s;
+        Q[0] = ((R.at<double>(2,1) - R.at<double>(1,2)) * s);
+        Q[1] = ((R.at<double>(0,2) - R.at<double>(2,0)) * s);
+        Q[2] = ((R.at<double>(1,0) - R.at<double>(0,1)) * s);
+    }
+
+    else
+    {
+        int i = R.at<double>(0,0) < R.at<double>(1,1) ? (R.at<double>(1,1) < R.at<double>(2,2) ? 2 : 1) : (R.at<double>(0,0) < R.at<double>(2,2) ? 2 : 0);
+        int j = (i + 1) % 3;
+        int k = (i + 2) % 3;
+
+        double s = sqrt(R.at<double>(i, i) - R.at<double>(j,j) - R.at<double>(k,k) + 1.0);
+        Q[i] = s * 0.5;
+        s = 0.5 / s;
+
+        Q[3] = (R.at<double>(k,j) - R.at<double>(j,k)) * s;
+        Q[j] = (R.at<double>(j,i) + R.at<double>(i,j)) * s;
+        Q[k] = (R.at<double>(k,i) + R.at<double>(i,k)) * s;
+    }
+}
+
 namespace Calibration {
 
 // Write serialization for this class
@@ -698,6 +734,86 @@ bool remap_images(std::vector<cv::Mat>& original_images, ReprojMaps &reproj_maps
         cv::remap(original_images[i_image], remapped_image, reproj_maps.mapx, reproj_maps.mapy, cv::INTER_NEAREST, cv::BORDER_CONSTANT, cv::Scalar());
         remapped_images.push_back(remapped_image);
     }
+
+    return true;
+}
+
+/**
+ * @brief Estimate the pose of a user-defined reference frame in relation to a camera using
+ * real life coordinates of chessboard corners.
+ * @param calib_data: Structure containing the camera calibration results (see Calibration::Data)
+ * @param object_points: Coordinates of the calibration board corners in the user-defined reference frame (3D)
+ * @param image_points: Pixel coordinates of the same calibration board corners (see Calibration::find_corners) (2D)
+ * @param [out] pose_data: Structure containing the pose estimation results (see Calibration::Pose)
+ * @return True if the pose estimation succeeded
+ */
+bool run_pose_estimation(Data& calib_data, std::vector<cv::Point3f>& object_points,
+                         std::vector<cv::Point2f>& image_points, Pose& pose_data)
+{
+    bool success = false;
+
+    // Verify arguments
+    if(calib_data.intrinsic.empty() || calib_data.distorsion.empty() ||
+            object_points.empty() || image_points.empty() ||
+            object_points.size() != image_points.size())
+        return success;
+
+    // Pose estimation
+    cv::Mat rvecs, tvecs;
+    success = cv::solvePnP(object_points, image_points, calib_data.intrinsic, calib_data.distorsion,
+                                rvecs, tvecs, false, cv::SOLVEPNP_ITERATIVE);
+
+    if(success) {
+        // Convert rotation matrix to quaternions
+        cv::Mat rmat;
+        cv::Rodrigues(rvecs, rmat);
+        getQuaternion(rmat, pose_data.quaternions);
+
+        // Fill Pose data
+        pose_data.translation[0] = tvecs.at<double>(0,0);
+        pose_data.translation[1] = tvecs.at<double>(1,0);
+        pose_data.translation[2] = tvecs.at<double>(2,0);
+    }
+
+    return success;
+}
+
+/**
+ * @brief Save the pose data to file.
+ * @param [in] file_name: Name of the file where the pose estimation results will be saved
+ * @param [out] pose_data: Structure containing the pose estimation results (see Calibration::Pose)
+ * @return True if the pose estimation data was saved successfully
+ */
+bool save_pose_estimation(std::string file_name, Pose& pose_data)
+{
+    cv::FileStorage fs(file_name, cv::FileStorage::WRITE);
+
+    if(!fs.isOpened()) {
+        std::cerr << "Could not open/create the pose data file: " << file_name << std::endl;
+        return false;
+    }
+
+    time_t tm;
+    time(&tm);
+    struct tm *t2 = localtime(&tm);
+    char buf[1024];
+    strftime(buf, sizeof(buf), "%c", t2);
+
+    fs << "calibration_time" << buf;
+
+    fs.writeComment("Pose of a user-defined frame in relation to the right camera.");
+    fs << "frame" << pose_data.frame;
+
+    fs.writeComment("Translation (m)");
+    fs << "x" << pose_data.translation[0];
+    fs << "y" << pose_data.translation[1];
+    fs << "z" << pose_data.translation[2];
+
+    fs.writeComment("Quaternions");
+    fs << "x" << pose_data.quaternions[0];
+    fs << "y" << pose_data.quaternions[1];
+    fs << "z" << pose_data.quaternions[2];
+    fs << "w" << pose_data.quaternions[3];
 
     return true;
 }
