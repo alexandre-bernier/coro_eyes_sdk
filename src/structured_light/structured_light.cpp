@@ -169,7 +169,7 @@ bool StructuredLight::compute_disparity_map(std::vector<std::vector<cv::Mat> > c
     std::vector<cv::Mat> black_images;
 
     // Used for threshold calculation
-    double min, max, black_thresh = 0;
+    double black_thresh = 0;
 
     // For each camera...
     for(unsigned int i_cam=0; i_cam<_num_cameras; i_cam++) {
@@ -182,8 +182,7 @@ bool StructuredLight::compute_disparity_map(std::vector<std::vector<cv::Mat> > c
         captured_images[i_cam].pop_back();
 
         // Extract information for threshold calculation
-        cv::minMaxIdx(black_images[i_cam], &min, &max);
-        black_thresh += max;
+        black_thresh += cv::mean(black_images[i_cam])[0];
     }
 
     // Find the black threshold with the black pattern images (average of max values of black images)
