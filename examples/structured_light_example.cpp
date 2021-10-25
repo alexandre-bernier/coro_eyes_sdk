@@ -818,6 +818,8 @@ int main(void)
         return -1;
     }
 
+    cv::Mat disparity_map_cropped = disparity_map(stereo_calib_data.validROI2);
+
     // [Compute disparity map]
 
 
@@ -829,7 +831,7 @@ int main(void)
 
     cout << "Applying colors to the disparity map..." << endl;
 
-    cv::Mat colored_disparity_map = structured_light.apply_color_to_disparity_map(disparity_map);
+    cv::Mat colored_disparity_map = structured_light.apply_color_to_disparity_map(disparity_map_cropped);
 
     float scale_factor = 0.5;
 
@@ -870,6 +872,55 @@ int main(void)
     cv::viz::writeCloud(point_cloud_file_name, point_cloud);
 
     // [Save point cloud]
+
+
+    /**
+     * @section compute_depth_map Compute the depth map
+     * @snippet structured_light_example.cpp Compute depth map
+     */
+    // [Compute depth map]
+
+    cout << "Computing depth map..." << endl;
+
+    cv::Mat depth_map = structured_light.compute_depth_map(disparity_map_cropped, stereo_calib_data.Q);
+
+    // [Compute depth map]
+
+
+    /**
+     * @section color_depth_map Color the depth map
+     * @snippet structured_light_example.cpp Color depth map
+     */
+    // [Color depth map]
+
+    cout << "Applying colors to the depth map..." << endl;
+
+    cv::Mat colored_depth_map = structured_light.apply_color_to_disparity_map(depth_map);
+
+    cv::Mat rescaled_colored_depth_map;
+
+    cv::resize(colored_depth_map, rescaled_colored_depth_map, cv::Size(0,0), scale_factor, scale_factor);
+
+    cv::imshow("Depth map (colored)", rescaled_colored_depth_map);
+
+    cv::waitKey();
+
+    // [Color depth map]
+
+
+    /**
+     * @section save_depth_map Save the depth map
+     * @snippet structured_light_example.cpp Save depth map
+     */
+    // [Save depth map]
+
+    cout << "Saving depth map..." << endl;
+
+    string depth_map_file_name = "./depth_map.png";
+
+    cv::imwrite(depth_map_file_name, depth_map);
+
+    // [Save depth map]
 
 
     /**

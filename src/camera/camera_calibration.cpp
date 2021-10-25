@@ -8,6 +8,7 @@
 #include <sstream>
 #include <ctime>
 #include <cstdio>
+#include <opencv2/imgcodecs.hpp>
 #include "camera/camera_calibration.h"
 
 /**
@@ -435,7 +436,14 @@ bool load_camera_calibration(std::string file_name, Data& calib_data)
 //    fs["rvecs"] >> calib_data.rvecs;
 //    fs["tvecs"] >> calib_data.tvecs;
 //    fs["avg_reprojection_error"] >> calib_data.total_avg_error;
-//    fs["per_view_reprojection_errors"] >> calib_data.reproj_errors;
+
+//    cv::Mat reproj_errors_mat;
+//    fs["per_view_reprojection_errors"] >> reproj_errors_mat;
+//    unsigned int num_errors = reproj_errors_mat.rows * reproj_errors_mat.cols;
+//    for(unsigned int i=0; i<num_errors; i++) {
+//        calib_data.reproj_errors.push_back(reproj_errors_mat.at<float>(i,0));
+//    }
+
 
     fs.release();
 
@@ -739,7 +747,7 @@ bool remap_images(std::vector<cv::Mat>& original_images, ReprojMaps &reproj_maps
 }
 
 /**
- * @brief Estimate the pose of a user-defined reference frame in relation to a camera using
+ * @brief Estimate the pose of a camera in relation to a user-defined reference frame using
  * real life coordinates of chessboard corners.
  * @param calib_data: Structure containing the camera calibration results (see Calibration::Data)
  * @param object_points: Coordinates of the calibration board corners in the user-defined reference frame (3D)

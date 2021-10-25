@@ -218,7 +218,6 @@ cv::Mat StructuredLight::apply_color_to_disparity_map(const cv::Mat& disparity_m
 
 /**
  * @brief Compute a point cloud from a disparity map.
- * @details
  * @param disparity_map: A disparity map (see StructuredLight::generate_disparity_map)
  * @param Q: Disparity-to-depth mapping matrix (see Calibration::StereoData and Calibration::run_stereo_calibration)
  * @return A point cloud
@@ -251,9 +250,38 @@ std::vector<cv::Point3f> StructuredLight::compute_point_cloud(cv::Mat disparity_
     point_cloud_tresh.forEach<cv::Point3f>([&](cv::Point3f &point, const int *position) -> void {
         if(point.x != 0.0 && point.y != 0.0 && point.z != 0.0) {
             const std::lock_guard<std::mutex> lock(pixel_mutex);    // Must lock when pushing into the vector, because cv::Mat::ForEach runs in parallel
-            point_cloud.push_back(cv::Point3f(point.x/1000.0, point.y/1000.0, point.z/1000.0));
+            point_cloud.push_back(cv::Point3f(point.x, point.y, point.z));
         }
     });
 
     return point_cloud;
+}
+
+/**
+ * @brief Compute a depth map from a disparity map.
+ * @param disparity_map: A disparity map (see StructuredLight::generate_disparity_map)
+ * @param Q: Disparity-to-depth mapping matrix (see Calibration::StereoData and Calibration::run_stereo_calibration)
+ * @return A depth map
+ */
+cv::Mat StructuredLight::compute_depth_map(cv::Mat disparity_map, const cv::Mat& Q)
+{
+    // Compute point cloud
+    cv::Mat point_cloud_image;
+    disparity_map.convertTo(disparity_map, CV_32FC1);
+    cv::reprojectImageTo3D(disparity_map, point_cloud_image, Q, true, -1);
+
+    // Create the depth map
+    std::vector<cv::Mat> channels(3);
+    cv::split(point_cloud_image, channels);
+    cv::Mat depth_map = channels[2];
+
+    for(int i_row=0; i_row<depth_map.rows; i_row++) {
+        float *depth_row_ptr = depth_map.ptr<float>(i_row);
+        for(int i_col=0; i_col<depth_map.cols; i_col++) {
+            if(depth_row_ptr[i_col] == 10000)   // cv::reprojectImageTo3D puts missing values at 10000 when 3rd arguement is true
+                depth_row_ptr[i_col] = 0;
+        }
+    }
+
+    return depth_map;
 }

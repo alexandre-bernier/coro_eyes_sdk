@@ -421,14 +421,14 @@ int main(void)
     std::vector<cv::Point3f> object_points;
     float corner_x, corner_y, corner_z;
 
-    cout << "This script will find a transform (translation and rotation) from the CoRo Eyes right camera to a user-defined reference frame." << endl;
+    cout << "This script will find a transform (translation and rotation) from a user-defined reference frame to the CoRo Eyes right camera." << endl;
     cout << "\t1- Fix a reference frame of your choosing in the camera's environement (it can be anything)." << endl;
     cout << "\t2- Determine the orientation of that frame (i.e. in which direction does each axis point)." << endl;
     cout << "\t3- Using that new reference frame axes, measure the distance from that frame to all the chessboard corners identified in the image." << endl;
 
     for(unsigned int i_corner=0; i_corner<image_points.size(); i_corner++) {
 
-        cout << endl << "Using your user-defined reference frame, what is the distance between that frame and the corner " << i_corner+1 << endl;
+        cout << endl << "Using your user-defined reference frame, what is the distance (cm) between that frame and the corner " << i_corner+1 << endl;
 
         cout << "X: ";
         cin >> corner_x;
@@ -439,7 +439,7 @@ int main(void)
         cout << "Z: ";
         cin >> corner_z;
 
-        object_points.push_back(cv::Point3f(corner_x, corner_y, corner_z));
+        object_points.push_back(cv::Point3f(corner_x/100, corner_y/100, corner_z/100));
 
     }
 
