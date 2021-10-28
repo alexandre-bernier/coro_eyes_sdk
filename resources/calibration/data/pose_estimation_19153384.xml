@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<calibration_time>"Thu 28 Oct 2021 12:31:52 PM"</calibration_time>
+<!-- Pose of a user-defined frame in relation to the right camera. -->
+<frame>coro_eyes</frame>
+<!-- Translation (m) -->
+<x>-2.4164092368615459e-01</x>
+<y>1.8997231135130027e-01</y>
+<z>6.7622429129032524e-01</z>
+<!-- Quaternions -->
+<x>9.9885506700470106e-01</x>
+<y>3.6816607226024234e-03</y>
+<z>6.4121934198849446e-03</z>
+<w>4.7263984902923495e-02</w>
+<!--
+-0.241641 0.189972 0.676224
+0.998855 0.003682 0.006412 0.047264
+-->
+</opencv_storage>
