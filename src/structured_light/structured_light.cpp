@@ -149,7 +149,7 @@ bool StructuredLight::extract_pattern_images(std::vector<cv::Mat> captured_image
 
 /**
  * @brief Compute the disparity map from the provided captured images.
- * @details captured_images must have the same size as the number of cameras with the right camera first.
+ * @details captured_images must have the same size as the number of cameras with the left camera first.
  *          The white image pattern must be the second to last image in each vector.
  *          The black image pattern must be the last image in each vector.
  * @param [in] captured_images: Vector of vectors containing the captured (remapped) images of all cameras
@@ -278,7 +278,7 @@ cv::Mat StructuredLight::compute_depth_map(cv::Mat disparity_map, const cv::Mat&
     for(int i_row=0; i_row<depth_map.rows; i_row++) {
         float *depth_row_ptr = depth_map.ptr<float>(i_row);
         for(int i_col=0; i_col<depth_map.cols; i_col++) {
-            if(depth_row_ptr[i_col] == 10000)   // cv::reprojectImageTo3D puts missing values at 10000 when 3rd arguement is true
+            if(depth_row_ptr[i_col] >= 10000)   // cv::reprojectImageTo3D puts missing values at 10000 when 4th arguement is true
                 depth_row_ptr[i_col] = 0;
         }
     }

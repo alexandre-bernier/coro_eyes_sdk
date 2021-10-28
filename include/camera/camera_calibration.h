@@ -112,7 +112,7 @@ bool calculate_stereo_reproj_maps(Data& camL_calib_data, Data& camR_calib_data, 
 
 bool remap_images(std::vector<cv::Mat> &original_images, ReprojMaps &reproj_maps, std::vector<cv::Mat> &remapped_images);
 
-bool run_pose_estimation(Data& calib_data, std::vector<cv::Point3f>& object_points,
+bool run_pose_estimation(Data& calib_data, StereoData &stereo_calib_data, std::vector<cv::Point3f>& object_points,
                          std::vector<cv::Point2f>& image_points, Pose& pose_data);
 bool save_pose_estimation(std::string file_name, Pose& pose_data);
 };

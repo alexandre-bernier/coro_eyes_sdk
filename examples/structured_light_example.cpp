@@ -8,8 +8,6 @@
 #include <thread>
 #include "coro_eyes_sdk.h"
 
-using namespace std;
-
 /**
  * @brief Structure used as a callback argument.
  */
@@ -28,13 +26,13 @@ void print_dlp_errors(dlp::ReturnCode err)
     unsigned int i;
     if(err.hasErrors()) {
         for(i=0; i<err.GetErrorCount(); i++) {
-            cerr << "Error: " << err.GetErrors().at(i) << endl;
+            std::cerr << "Error: " << err.GetErrors().at(i) << std::endl;
         }
     }
 
     if(err.hasWarnings()) {
         for(i=0; i<err.GetWarningCount(); i++) {
-            cout << "Warning: " << err.GetWarnings().at(i) << endl;
+            std::cout << "Warning: " << err.GetWarnings().at(i) << std::endl;
         }
     }
 }
@@ -47,7 +45,7 @@ void print_dlp_errors(dlp::ReturnCode err)
 void print_firmware_upload_progress(dlp::LCr4500 *projector)
 {
     // Write first message
-    cout << "Uploading: 0%" << flush;
+    std::cout << "Uploading: 0%" << std::flush;
 
     // Give time for the firmware upload to start
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -58,26 +56,26 @@ void print_firmware_upload_progress(dlp::LCr4500 *projector)
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
         // Print progress
-        cout << "\rUploading: " << projector->GetFirmwareUploadPercentComplete() << "% " << flush;
+        std::cout << "\rUploading: " << projector->GetFirmwareUploadPercentComplete() << "% " << std::flush;
         switch(progress++) {
         case 0:
-            cout << "|" << flush;
+            std::cout << "|" << std::flush;
             break;
         case 1:
-            cout << "/" << flush;
+            std::cout << "/" << std::flush;
             break;
         case 2:
-            cout << "—" << flush;
+            std::cout << "—" << std::flush;
             break;
         case 3:
-            cout << "\\" << flush;
+            std::cout << "\\" << std::flush;
             progress = 0;
             break;
         }
     } while(projector->FirmwareUploadInProgress());
 
     // Upload complete
-    cout << "\rUpload done." << endl << flush;
+    std::cout << "\rUpload done." << std::endl << std::flush;
 }
 
 /**
@@ -93,7 +91,7 @@ void camera_feed_callback(cv::Mat frame, void *callback_data)
     // Rescale image
     float scale_factor = 0.5;
     cv::Mat rescaled_frame;
-    cv::resize(frame, rescaled_frame, cv::Size(frame_info.image_width*scale_factor, frame_info.image_height*scale_factor));
+    cv::resize(frame, rescaled_frame, cv::Size(0,0), scale_factor, scale_factor);
 
     // Show the frame in the appropriate window
     cv::imshow(frame_info.cv_window_name, rescaled_frame);
@@ -113,13 +111,13 @@ int main(void)
 
     dlp::Parameters param;  // DLP class to hold the projector settings (DLP)
 
-    string proj_param_file = "../resources/dlp_platforms/projector_settings.txt";   // Path to the projector settings file (DLP)
+    std::string proj_param_file = "../resources/dlp_platforms/projector_settings.txt";   // Path to the projector settings file (DLP)
 
-    string cam_calib_data_file_path = "../resources/calibration/data/camera_";  // Path to the cameras calibration data files
+    std::string cam_calib_data_file_path = "../resources/calibration/data/camera_";  // Path to the cameras calibration data files
 
-    string stereo_calib_data_file_path = "../resources/calibration/data/stereo_";   // Path to stereo camera calibration data file
+    std::string stereo_calib_data_file_path = "../resources/calibration/data/stereo_";   // Path to stereo camera calibration data file
 
-    string calib_data_file_extension = ".xml";
+    std::string calib_data_file_extension = ".xml";
 
     // [Variables]
 
@@ -130,7 +128,7 @@ int main(void)
      */
     // [Connect to projector]
 
-    cout << "Connecting..." << endl;
+    std::cout << "Connecting..." << std::endl;
 
     ret = projector.Connect("");
 
@@ -138,7 +136,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -153,7 +151,7 @@ int main(void)
      */
     // [Load projector settings]
 
-    cout << "Loading parameters..." << endl;
+    std::cout << "Loading parameters..." << std::endl;
 
     ret = param.Load(proj_param_file);
 
@@ -161,7 +159,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -176,7 +174,7 @@ int main(void)
      */
     // [Setup projector]
 
-    cout << "Setting up projector..." << endl;
+    std::cout << "Setting up projector..." << std::endl;
 
     ret = projector.Setup(param);
 
@@ -184,7 +182,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -203,13 +201,13 @@ int main(void)
 
     unsigned int num_cameras = Camera::get_num_available_cameras();
 
-    cout << "Number of available cameras: " << num_cameras << endl;
+    std::cout << "Number of available cameras: " << num_cameras << std::endl;
 
     if(num_cameras < 1) {
 
-        cerr << "No camera connected." << endl;
+        std::cerr << "No camera connected." << std::endl;
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -217,9 +215,9 @@ int main(void)
 
     else if(num_cameras != 2) {
 
-        cerr << num_cameras << " cameras found. This application requires exactly 2." << endl;
+        std::cerr << num_cameras << " cameras found. This application requires exactly 2." << std::endl;
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -234,7 +232,7 @@ int main(void)
      */
     // [GUID]
 
-    cout << "Getting camera's GUIDs..." << endl;
+    std::cout << "Getting camera's GUIDs..." << std::endl;
 
     FlyCapture2::PGRGuid guid[num_cameras];
 
@@ -242,9 +240,9 @@ int main(void)
 
         if(Camera::get_guid(i_cam, &guid[i_cam])) {
 
-            cerr << "Can't get GUID of camera " << i_cam << "." << endl;
+            std::cerr << "Can't get GUID of camera " << i_cam << "." << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
         }
@@ -259,7 +257,7 @@ int main(void)
      */
     // [Connect to cameras]
 
-    cout << "Connecting to all available cameras..." << endl;
+    std::cout << "Connecting to all available cameras..." << std::endl;
 
     Camera camera[num_cameras];
 
@@ -267,15 +265,15 @@ int main(void)
 
         if(camera[i].connect(&guid[i]) != FlyCapture2::PGRERROR_OK) {
 
-            cerr << "Can't connect to camera " << i << "." << endl;
+            std::cerr << "Can't connect to camera " << i << "." << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
 
         }
 
-        cout << "Serial number" << ": " << camera[i].get_serial_number() << endl;
+        std::cout << "Serial number" << ": " << camera[i].get_serial_number() << std::endl;
 
     }
 
@@ -288,15 +286,15 @@ int main(void)
      */
     // [Configure cameras]
 
-    cout << "Configuring all connected cameras..." << endl;
+    std::cout << "Configuring all connected cameras..." << std::endl;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
         if(camera[i_cam].configure()) {
 
-            cerr << "Can't configure camera " << i_cam << endl;
+            std::cerr << "Can't configure camera " << i_cam << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
 
@@ -313,7 +311,7 @@ int main(void)
      */
     // [CoRo Eyes cameras properties]
 
-    cout << "Setting up cameras for CoRo Eyes..." << endl;
+    std::cout << "Setting up cameras for CoRo Eyes..." << std::endl;
 
     Camera::CameraPosition camera_position = Camera::CameraPosition::Undefined;
 
@@ -341,7 +339,7 @@ int main(void)
 
         default:
 
-            cerr << "Unrecognized camera (" << camera[i_cam].get_serial_number() << ")." << endl;
+            std::cerr << "Unrecognized camera (" << camera[i_cam].get_serial_number() << ")." << std::endl;
 
             break;
 
@@ -349,9 +347,9 @@ int main(void)
 
         if(camera[i_cam].set_properties_for_coro_eyes(camera_position)) {
 
-            cerr << "Can't configure camera " << i_cam << "." << endl;
+            std::cerr << "Can't configure camera " << i_cam << "." << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
 
@@ -372,18 +370,18 @@ int main(void)
 
     Calibration::StereoData stereo_calib_data;
 
-    string file_name;
+    std::string file_name;
 
     // Load camera calibration data
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
-        file_name = cam_calib_data_file_path + to_string(camera[i_cam].get_serial_number()) + calib_data_file_extension;
+        file_name = cam_calib_data_file_path + std::to_string(camera[i_cam].get_serial_number()) + calib_data_file_extension;
 
         if(!Calibration::load_camera_calibration(file_name, camera_calib_data[i_cam])) {
 
-            cerr << "Error loading camera calibration data: " << file_name << "." << endl;
+            std::cerr << "Error loading camera calibration data: " << file_name << "." << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
 
@@ -394,23 +392,23 @@ int main(void)
     // Load stereo calibration data
     if(camL_index == 0) {
 
-        file_name = stereo_calib_data_file_path + to_string(camera[0].get_serial_number()) + "_" +
-                to_string(camera[1].get_serial_number()) + calib_data_file_extension;
+        file_name = stereo_calib_data_file_path + std::to_string(camera[0].get_serial_number()) + "_" +
+                std::to_string(camera[1].get_serial_number()) + calib_data_file_extension;
 
     }
 
     else {
 
-        file_name = stereo_calib_data_file_path + to_string(camera[1].get_serial_number()) + "_" +
-                to_string(camera[0].get_serial_number()) + calib_data_file_extension;
+        file_name = stereo_calib_data_file_path + std::to_string(camera[1].get_serial_number()) + "_" +
+                std::to_string(camera[0].get_serial_number()) + calib_data_file_extension;
 
     }
 
     if(!Calibration::load_stereo_calibration(file_name, stereo_calib_data)) {
 
-        cerr << "Error loading stereo calibration data: " << file_name << "." << endl;
+        std::cerr << "Error loading stereo calibration data: " << file_name << "." << std::endl;
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -426,7 +424,7 @@ int main(void)
      */
     // [Generate patterns]
 
-    cout << "Generating patterns..." << endl;
+    std::cout << "Generating patterns..." << std::endl;
 
     unsigned int proj_height;
 
@@ -461,7 +459,7 @@ int main(void)
 
     if(upload_patterns)
 
-        cout << "Patterns will be uploaded to the projector..." << endl;
+        std::cout << "Patterns will be uploaded to the projector..." << std::endl;
 
     // [Upload projector parameter]
 
@@ -493,7 +491,7 @@ int main(void)
      */
     // [Prepare patterns]
 
-    cout << "Preparing patterns..." << endl;
+    std::cout << "Preparing patterns..." << std::endl;
 
     dlp::Pattern::Sequence dlp_pattern_sequence;
 
@@ -518,7 +516,7 @@ int main(void)
      */
     // [Camera feeds]
 
-    cout << "Starting up camera feeds..." << endl;
+    std::cout << "Starting up camera feeds..." << std::endl;
 
     FrameInfo frame_info[num_cameras];
 
@@ -562,7 +560,7 @@ int main(void)
      */
     // [Start capture]
 
-    cout << "Starting captures..." << endl;
+    std::cout << "Starting captures..." << std::endl;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
@@ -579,7 +577,7 @@ int main(void)
      */
     // [Project white]
 
-    cout << "Projecting white..." << endl;
+    std::cout << "Projecting white..." << std::endl;
 
     print_dlp_errors(projector.ProjectSolidWhitePattern());
 
@@ -621,7 +619,7 @@ int main(void)
      */
     // [Project black]
 
-    cout << "Projecting black..." << endl;
+    std::cout << "Projecting black..." << std::endl;
 
     print_dlp_errors(projector.ProjectSolidBlackPattern());
 
@@ -634,7 +632,7 @@ int main(void)
      */
     // [Start buffering]
 
-    cout << "Starting to buffer images..." << endl;
+    std::cout << "Starting to buffer images..." << std::endl;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
@@ -661,7 +659,7 @@ int main(void)
     unsigned int sequence_duration = sequence_period.Get() * structured_light.get_nb_patterns() * 1.2;
 
     // Start pattern sequence projection
-    cout << "Projecting patterns..." << endl;
+    std::cout << "Projecting patterns..." << std::endl;
 
     projector.StartPatternSequence(0, structured_light.get_nb_patterns(), false);
 
@@ -677,7 +675,7 @@ int main(void)
      */
     // [Stop buffering]
 
-    cout << "Stopping to buffer images..." << endl;
+    std::cout << "Stopping to buffer images..." << std::endl;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
@@ -694,7 +692,7 @@ int main(void)
      */
     // [Stop projection]
 
-    cout << "Stopping projection..." << endl;
+    std::cout << "Stopping projection..." << std::endl;
 
     print_dlp_errors(projector.ProjectSolidBlackPattern());
 
@@ -709,7 +707,7 @@ int main(void)
      */
     // [Retrieve images]
 
-    cout << "Retrieving images..." << endl;
+    std::cout << "Retrieving images..." << std::endl;
 
     std::vector<std::vector<cv::Mat> > captured_patterns;
 
@@ -719,9 +717,9 @@ int main(void)
 
         if(!structured_light.extract_pattern_images(camera[i_cam].get_image_buffer_content(), captured_patterns[i_cam])) {
 
-            cerr << "Couldn't find all the patterns in the captured images." << endl;
+            std::cerr << "Couldn't find all the patterns in the captured images." << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
 
@@ -737,7 +735,7 @@ int main(void)
      */
     // [Remap images]
 
-    cout << "Remapping captured patterns..." << endl;
+    std::cout << "Remapping captured patterns..." << std::endl;
 
     // Calculate the reprojection maps
     Calibration::ReprojMaps reprojection_maps[num_cameras];
@@ -750,21 +748,21 @@ int main(void)
     // Remap images (remapped_images[0] => Right camera; remapped_images[1] => Left camera)
     std::vector<std::vector<cv::Mat> > remapped_images(num_cameras);
 
-    if(!Calibration::remap_images(captured_patterns[camR_index], reprojection_maps[camR_index], remapped_images[0])) {
+    if(!Calibration::remap_images(captured_patterns[camL_index], reprojection_maps[camL_index], remapped_images[0])) {
 
-        cerr << "Error while remapping the captured patterns of the right camera." << endl;
+        std::cerr << "Error while remapping the captured patterns of the left camera." << std::endl;
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
     }
 
-    if(!Calibration::remap_images(captured_patterns[camL_index], reprojection_maps[camL_index], remapped_images[1])) {
+    if(!Calibration::remap_images(captured_patterns[camR_index], reprojection_maps[camR_index], remapped_images[1])) {
 
-        cerr << "Error while remapping the captured patterns of the left camera." << endl;
+        std::cerr << "Error while remapping the captured patterns of the right camera." << std::endl;
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -777,13 +775,11 @@ int main(void)
 
 //        float scale_factor = 0.5;
 
-//        cv::resize(remapped_images[1][i_image], rescaled_image,
-//                   cv::Size(remapped_images[1][i_image].size().width*scale_factor, remapped_images[1][i_image].size().height*scale_factor));
+//        cv::resize(remapped_images[0][i_image], rescaled_image, cv::Size(0,0), scale_factor, scale_factor);
 
 //        cv::imshow("Remapped image (left)", rescaled_image);
 
-//        cv::resize(remapped_images[0][i_image], rescaled_image,
-//                   cv::Size(remapped_images[0][i_image].size().width*scale_factor, remapped_images[0][i_image].size().height*scale_factor));
+//        cv::resize(remapped_images[1][i_image], rescaled_image, cv::Size(0,0), scale_factor, scale_factor);
 
 //        cv::imshow("Remapped image (right)", rescaled_image);
 
@@ -805,20 +801,20 @@ int main(void)
      */
     // [Compute disparity map]
 
-    cout << "Computing the disparity map..." << endl;
+    std::cout << "Computing the disparity map..." << std::endl;
 
     cv::Mat disparity_map;
 
     if(!structured_light.compute_disparity_map(remapped_images, disparity_map)) {
 
-        cerr << "Error while computing the disparity map." << endl;
+        std::cerr << "Error while computing the disparity map." << std::endl;
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
     }
 
-    cv::Mat disparity_map_cropped = disparity_map(stereo_calib_data.validROI2);
+    disparity_map = disparity_map(stereo_calib_data.validROI2);
 
     // [Compute disparity map]
 
@@ -829,15 +825,15 @@ int main(void)
      */
     // [Color disparity map]
 
-    cout << "Applying colors to the disparity map..." << endl;
+    std::cout << "Applying colors to the disparity map..." << std::endl;
 
-    cv::Mat colored_disparity_map = structured_light.apply_color_to_disparity_map(disparity_map_cropped);
+    cv::Mat colored_disparity_map = structured_light.apply_color_to_disparity_map(disparity_map);
 
     float scale_factor = 0.5;
 
     cv::Mat rescaled_colored_disparity_map;
 
-    cv::resize(colored_disparity_map, rescaled_colored_disparity_map, cv::Size(colored_disparity_map.size().width*scale_factor, colored_disparity_map.size().height*scale_factor));
+    cv::resize(colored_disparity_map, rescaled_colored_disparity_map, cv::Size(0,0), scale_factor, scale_factor);
 
     cv::imshow("Disparity map (colored)", rescaled_colored_disparity_map);
 
@@ -852,7 +848,7 @@ int main(void)
      */
     // [Compute point cloud]
 
-    cout << "Computing point cloud..." << endl;
+    std::cout << "Computing point cloud..." << std::endl;
 
     std::vector<cv::Point3f> point_cloud = structured_light.compute_point_cloud(disparity_map, stereo_calib_data.Q);
 
@@ -865,9 +861,9 @@ int main(void)
      */
     // [Save point cloud]
 
-    cout << "Saving point cloud..." << endl;
+    std::cout << "Saving point cloud..." << std::endl;
 
-    string point_cloud_file_name = "./point_cloud.ply";
+    std::string point_cloud_file_name = "./point_cloud.ply";
 
     cv::viz::writeCloud(point_cloud_file_name, point_cloud);
 
@@ -880,9 +876,9 @@ int main(void)
      */
     // [Compute depth map]
 
-    cout << "Computing depth map..." << endl;
+    std::cout << "Computing depth map..." << std::endl;
 
-    cv::Mat depth_map = structured_light.compute_depth_map(disparity_map_cropped, stereo_calib_data.Q);
+    cv::Mat depth_map = structured_light.compute_depth_map(disparity_map, stereo_calib_data.Q);
 
     // [Compute depth map]
 
@@ -893,7 +889,7 @@ int main(void)
      */
     // [Color depth map]
 
-    cout << "Applying colors to the depth map..." << endl;
+    std::cout << "Applying colors to the depth map..." << std::endl;
 
     cv::Mat colored_depth_map = structured_light.apply_color_to_disparity_map(depth_map);
 
@@ -914,9 +910,9 @@ int main(void)
      */
     // [Save depth map]
 
-    cout << "Saving depth map..." << endl;
+    std::cout << "Saving depth map..." << std::endl;
 
-    string depth_map_file_name = "./depth_map.png";
+    std::string depth_map_file_name = "./depth_map.png";
 
     cv::imwrite(depth_map_file_name, depth_map);
 
@@ -929,7 +925,7 @@ int main(void)
      */
     // [Stop captures]
 
-    cout << "Stopping captures..." << endl;
+    std::cout << "Stopping captures..." << std::endl;
 
     for(unsigned int i=0; i<num_cameras; i++) {
 
@@ -957,7 +953,7 @@ int main(void)
      */
     // [Disconnect]
 
-    cout << "Disconnecting from all devices..." << endl;
+    std::cout << "Disconnecting from all devices..." << std::endl;
 
     for(unsigned int i=0; i<num_cameras; i++) {
 

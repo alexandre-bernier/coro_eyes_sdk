@@ -9,8 +9,6 @@
 #include <ctime>
 #include "coro_eyes_sdk.h"
 
-using namespace std;
-
 int main(void)
 {
     /**
@@ -19,7 +17,7 @@ int main(void)
      */
     // [Calibration settings]
 
-    cout << "Loading the calibration configuration..." << endl;
+    std::cout << "Loading the calibration configuration..." << std::endl;
 
     std::string calib_settings_file = "../resources/calibration/camera_calibration_settings.xml";
 
@@ -54,13 +52,13 @@ int main(void)
 
     unsigned int num_cameras = Camera::get_num_available_cameras();
 
-    cout << "Number of available cameras: " << num_cameras << endl;
+    std::cout << "Number of available cameras: " << num_cameras << std::endl;
 
     if(num_cameras < 1) {
 
-        cerr << "No camera connected. Stopping application..." << endl;
+        std::cerr << "No camera connected. Stopping application..." << std::endl;
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -75,7 +73,7 @@ int main(void)
      */
     // [GUID]
 
-    cout << "Getting camera's GUIDs..." << endl;
+    std::cout << "Getting camera's GUIDs..." << std::endl;
 
     FlyCapture2::PGRGuid guid[num_cameras];
 
@@ -83,9 +81,9 @@ int main(void)
 
         if(Camera::get_guid(i_cam, &guid[i_cam])) {
 
-            cerr << "Can't get GUID of camera " << i_cam << endl;
+            std::cerr << "Can't get GUID of camera " << i_cam << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
         }
@@ -100,7 +98,7 @@ int main(void)
      */
     // [Connect]
 
-    cout << "Connecting to all available cameras..." << endl;
+    std::cout << "Connecting to all available cameras..." << std::endl;
 
     Camera camera[num_cameras];
 
@@ -108,15 +106,15 @@ int main(void)
 
         if(camera[i_cam].connect(&guid[i_cam]) != FlyCapture2::PGRERROR_OK) {
 
-            cerr << "Can't connect to camera " << i_cam << endl;
+            std::cerr << "Can't connect to camera " << i_cam << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
 
         }
 
-        cout << "Serial number" << ": " << camera[i_cam].get_serial_number() << endl;
+        std::cout << "Serial number" << ": " << camera[i_cam].get_serial_number() << std::endl;
 
     }
 
@@ -129,15 +127,15 @@ int main(void)
      */
     // [Configure]
 
-    cout << "Configuring all connected cameras..." << endl;
+    std::cout << "Configuring all connected cameras..." << std::endl;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
         if(camera[i_cam].configure()) {
 
-            cerr << "Can't configure camera " << i_cam << endl;
+            std::cerr << "Can't configure camera " << i_cam << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
 
@@ -154,7 +152,7 @@ int main(void)
      */
     // [CoRo Eyes properties]
 
-    cout << "Setting up cameras for CoRo Eyes..." << endl;
+    std::cout << "Setting up cameras for CoRo Eyes..." << std::endl;
 
     Camera::CameraPosition camera_position = Camera::CameraPosition::Undefined;
 
@@ -182,7 +180,7 @@ int main(void)
 
         default:
 
-            cerr << "Unrecognized camera (" << camera[i_cam].get_serial_number() << ")." << endl;
+            std::cerr << "Unrecognized camera (" << camera[i_cam].get_serial_number() << ")." << std::endl;
 
             break;
 
@@ -190,9 +188,9 @@ int main(void)
 
         if(camera[i_cam].set_properties_for_coro_eyes(camera_position)) {
 
-            cerr << "Can't configure camera " << i_cam << "." << endl;
+            std::cerr << "Can't configure camera " << i_cam << "." << std::endl;
 
-            cout << "Stopping application..." << endl;
+            std::cout << "Stopping application..." << std::endl;
 
             return -1;
 
@@ -226,7 +224,7 @@ int main(void)
      */
     // [Start capture]
 
-    cout << "Starting captures..." << endl;
+    std::cout << "Starting captures..." << std::endl;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
@@ -269,9 +267,9 @@ int main(void)
         while(!good_image) {
 
             // Wait for user to press a key
-            cout << endl;
+            std::cout << std::endl;
 
-            cout << "Press any key to capture the chessboard." << endl;
+            std::cout << "Press any key to capture the chessboard." << std::endl;
 
             do {
 
@@ -284,14 +282,14 @@ int main(void)
                     cv::Mat rescaled_frame;
                     cv::resize(camera[i_cam].get_last_frame(), image[i_cam], cv::Size(camera[i_cam].get_camera_width()*scale_factor, camera[i_cam].get_camera_height()*scale_factor));
 
-                    imshow("Camera " + to_string(i_cam), image[i_cam]);
+                    imshow("Camera " + std::to_string(i_cam), image[i_cam]);
 
                 }
 
             } while(cv::waitKey(1) == -1);
 
             // For every camera...
-            cout << "Trying to find the chessboard..." << endl;
+            std::cout << "Trying to find the chessboard..." << std::endl;
 
             for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
@@ -301,7 +299,7 @@ int main(void)
                 // Try to find the chessboard corners
                 good_image = Calibration::find_corners(calib_settings, captured_images[i_cam], temp_image_points[i_cam]);
 
-                cout << "[Camera " << i_cam << "] Chessboard found: " << good_image << endl;
+                std::cout << "[Camera " << i_cam << "] Chessboard found: " << good_image << std::endl;
 
                 // If the chessboard can't be found in one of the camera's capture image, drop all of them and retry
                 if(!good_image) {
@@ -317,7 +315,7 @@ int main(void)
         // If images are good for all cameras
         if(good_image) {
 
-            cout << "Drawing chessboard corners..." << endl;
+            std::cout << "Drawing chessboard corners..." << std::endl;
 
             for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
@@ -340,15 +338,15 @@ int main(void)
 
             }
 
-            cout << endl;
+            std::cout << std::endl;
 
-            cout << "Calibration image " << i_image+1 << " of " << calib_settings.nrFrames << " acquired." << endl;
+            std::cout << "Calibration image " << i_image+1 << " of " << calib_settings.nrFrames << " acquired." << std::endl;
 
         }
 
     }
 
-    cout << endl;
+    std::cout << std::endl;
 
     // [Capture images]
 
@@ -374,7 +372,7 @@ int main(void)
      */
     // [Camera calibration]
 
-    cout << "Running camera calibration..." << endl;
+    std::cout << "Running camera calibration..." << std::endl;
 
     cv::Size image_size(camera[0].get_camera_width(), camera[0].get_camera_height());
 
@@ -391,16 +389,16 @@ int main(void)
         camera_calib_successful[i_cam] = Calibration::run_camera_calibration(calib_settings, image_size, camera_calib_data[i_cam], image_points[i_cam]);
 
         // Display the calibration result
-        cout << "\nCamera " << i_cam << " calibration\n    " <<
+        std::cout << "\nCamera " << i_cam << " calibration\n    " <<
                 (camera_calib_successful[i_cam] ? "Calibration succeeded." : "Calibration failed.") <<
-                " Avg. re-projection error = " << camera_calib_data[i_cam].total_avg_error << endl;
+                " Avg. re-projection error = " << camera_calib_data[i_cam].total_avg_error << std::endl;
 
         // Save calibration if the calibration succeeded for all cameras
         all_camera_calibrated &= camera_calib_successful[i_cam];
 
     }
 
-    cout << endl;
+    std::cout << std::endl;
 
     // [Camera calibration]
 
@@ -413,7 +411,7 @@ int main(void)
 
     if(all_camera_calibrated) {
 
-        cout << "Saving camera calibration to file..." << endl;
+        std::cout << "Saving camera calibration to file..." << std::endl;
 
         std::string calibration_data_file;
 
@@ -425,11 +423,11 @@ int main(void)
 
             Calibration::save_camera_calibration(calibration_data_file, calib_settings, image_size, camera_calib_data[i_cam], image_points[i_cam]);
 
-            cout << "\tCamera " << i_cam << ": " << calibration_data_file << endl;
+            std::cout << "\tCamera " << i_cam << ": " << calibration_data_file << std::endl;
 
         }
 
-        cout << endl;
+        std::cout << std::endl;
 
     }
 
@@ -450,7 +448,7 @@ int main(void)
 
         if(num_cameras == 2) {
 
-            cout << "Running stereo camera calibration..." << endl;
+            std::cout << "Running stereo camera calibration..." << std::endl;
 
             // Find the cameras' intrinsic matrix, distorsion coefficients and extrinsic matrices
             // Calibration
@@ -458,11 +456,11 @@ int main(void)
                                                                           camera_calib_data[camL_index], image_points[camL_index], camera_calib_data[camR_index], image_points[camR_index]);
 
             // Display the calibration result
-            cout << "\nStereo calibration\n    " <<
+            std::cout << "\nStereo calibration\n    " <<
                     (stereo_calib_successful ? "Calibration succeeded." : "Calibration failed.") <<
-                    " Avg. re-projection error = " << stereo_calib_data.total_avg_error << endl;
+                    " Avg. re-projection error = " << stereo_calib_data.total_avg_error << std::endl;
 
-            cout << endl;
+            std::cout << std::endl;
 
         }
 
@@ -479,7 +477,7 @@ int main(void)
 
     if(stereo_calib_successful) {
 
-        cout << "Saving stereo camera calibration to file..." << endl;
+        std::cout << "Saving stereo camera calibration to file..." << std::endl;
 
         std::string calibration_data_file;
 
@@ -490,9 +488,9 @@ int main(void)
 
         Calibration::save_stereo_calibration(calibration_data_file, calib_settings, image_size, stereo_calib_data, image_points[camL_index], image_points[camR_index]);
 
-        cout << "\t" << calibration_data_file << endl;
+        std::cout << "\t" << calibration_data_file << std::endl;
 
-        cout << endl;
+        std::cout << std::endl;
 
     }
 
@@ -505,7 +503,7 @@ int main(void)
      */
     // [Stop captures]
 
-    cout << "Stopping captures..." << endl;
+    std::cout << "Stopping captures..." << std::endl;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 
@@ -533,7 +531,7 @@ int main(void)
      */
     // [Disconnect]
 
-    cout << "Disconnecting from all cameras..." << endl;
+    std::cout << "Disconnecting from all cameras..." << std::endl;
 
     for(unsigned int i_cam=0; i_cam<num_cameras; i_cam++) {
 

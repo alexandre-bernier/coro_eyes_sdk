@@ -9,8 +9,6 @@
 #include <chrono>
 #include "coro_eyes_sdk.h"
 
-using namespace std;
-
 /**
  * @brief Prints errors and warnings if there is any.
  * @param err The dlp::ReturnCode to print
@@ -20,13 +18,13 @@ void print_dlp_errors(dlp::ReturnCode err)
     unsigned int i;
     if(err.hasErrors()) {
         for(i=0; i<err.GetErrorCount(); i++) {
-            cerr << "Error: " << err.GetErrors().at(i) << endl;
+            std::cerr << "Error: " << err.GetErrors().at(i) << std::endl;
         }
     }
 
     if(err.hasWarnings()) {
         for(i=0; i<err.GetWarningCount(); i++) {
-            cout << "Warning: " << err.GetWarnings().at(i) << endl;
+            std::cout << "Warning: " << err.GetWarnings().at(i) << std::endl;
         }
     }
 }
@@ -39,7 +37,7 @@ void print_dlp_errors(dlp::ReturnCode err)
 void print_firmware_upload_progress(dlp::LCr4500 *projector)
 {
     // Write first message
-    cout << "Uploading: 0%" << flush;
+    std::cout << "Uploading: 0%" << std::flush;
 
     // Give time for the firmware upload to start
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -50,26 +48,26 @@ void print_firmware_upload_progress(dlp::LCr4500 *projector)
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
         // Print progress
-        cout << "\rUploading: " << projector->GetFirmwareUploadPercentComplete() << "% " << flush;
+        std::cout << "\rUploading: " << projector->GetFirmwareUploadPercentComplete() << "% " << std::flush;
         switch(progress++) {
         case 0:
-            cout << "|" << flush;
+            std::cout << "|" << std::flush;
             break;
         case 1:
-            cout << "/" << flush;
+            std::cout << "/" << std::flush;
             break;
         case 2:
-            cout << "—" << flush;
+            std::cout << "—" << std::flush;
             break;
         case 3:
-            cout << "\\" << flush;
+            std::cout << "\\" << std::flush;
             progress = 0;
             break;
         }
     } while(projector->FirmwareUploadInProgress());
 
     // Upload complete
-    cout << "\rUpload done." << endl << flush;
+    std::cout << "\rUpload done." << std::endl << std::flush;
 }
 
 int main(void)
@@ -86,7 +84,7 @@ int main(void)
 
     dlp::Parameters param;  // DLP class to hold the projector settings (DLP)
 
-    string proj_param_file = "../resources/dlp_platforms/projector_settings.txt";   // Path to the projector settings file (DLP)
+    std::string proj_param_file = "../resources/dlp_platforms/projector_settings.txt";   // Path to the projector settings file (DLP)
 
     // [Variables]
 
@@ -97,7 +95,7 @@ int main(void)
      */
     // [Connection]
 
-    cout << "Connecting..." << endl;
+    std::cout << "Connecting..." << std::endl;
 
     ret = projector.Connect("");
 
@@ -105,7 +103,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -120,7 +118,7 @@ int main(void)
      */
     // [Load settings]
 
-    cout << "Loading parameters..." << endl;
+    std::cout << "Loading parameters..." << std::endl;
 
     ret = param.Load(proj_param_file);
 
@@ -128,7 +126,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -143,7 +141,7 @@ int main(void)
      */
     // [Setup]
 
-    cout << "Setting up projector..." << endl;
+    std::cout << "Setting up projector..." << std::endl;
 
     ret = projector.Setup(param);
 
@@ -151,7 +149,7 @@ int main(void)
 
     if(ret.hasErrors()) {
 
-        cout << "Stopping application..." << endl;
+        std::cout << "Stopping application..." << std::endl;
 
         return -1;
 
@@ -168,7 +166,7 @@ int main(void)
      */
     // [Project white]
 
-    cout << "Projecting white..." << endl;
+    std::cout << "Projecting white..." << std::endl;
 
     print_dlp_errors(projector.ProjectSolidWhitePattern());
 
@@ -183,7 +181,7 @@ int main(void)
      */
     // [Project black]
 
-    cout << "Projecting black..." << endl;
+    std::cout << "Projecting black..." << std::endl;
 
     print_dlp_errors(projector.ProjectSolidBlackPattern());
 
@@ -198,7 +196,7 @@ int main(void)
      */
     // [Stop projection]
 
-    cout << "Stopping projection..." << endl;
+    std::cout << "Stopping projection..." << std::endl;
 
     print_dlp_errors(projector.StopPatternSequence());
 
@@ -212,7 +210,7 @@ int main(void)
      */
     // [Generate patterns]
 
-    cout << "Generating patterns..." << endl;
+    std::cout << "Generating patterns..." << std::endl;
 
     unsigned int proj_height;
 
@@ -259,7 +257,7 @@ int main(void)
 
     if(upload_patterns)
 
-        cout << "Patterns will be uploaded to the projector..." << endl;
+        std::cout << "Patterns will be uploaded to the projector..." << std::endl;
 
     // [Upload parameter]
 
@@ -291,7 +289,7 @@ int main(void)
      */
     // [Prepare patterns]
 
-    cout << "Preparing patterns..." << endl;
+    std::cout << "Preparing patterns..." << std::endl;
 
     dlp::Pattern::Sequence dlp_pattern_sequence;
 
@@ -316,7 +314,7 @@ int main(void)
      */
     // [Project patterns]
 
-    cout << "Projecting patterns..." << endl;
+    std::cout << "Projecting patterns..." << std::endl;
 
     projector.StartPatternSequence(0, structured_light.get_nb_patterns(), false);
 
@@ -346,7 +344,7 @@ int main(void)
      */
     // [Stop projection 2]
 
-    cout << "Stopping projection..." << endl;
+    std::cout << "Stopping projection..." << std::endl;
 
     print_dlp_errors(projector.ProjectSolidBlackPattern());
 
@@ -361,7 +359,7 @@ int main(void)
      */
     // [Disconnect]
 
-    cout << "Disconnecting..." << endl;
+    std::cout << "Disconnecting..." << std::endl;
 
     print_dlp_errors(projector.Disconnect());
 

@@ -7,8 +7,6 @@
 #include <iostream>
 #include "coro_eyes_sdk.h"
 
-using namespace std;
-
 /**
  * @brief Structure used as a callback argument.
  */
@@ -47,11 +45,11 @@ int main(void)
 
     unsigned int num_cameras = Camera::get_num_available_cameras();
 
-    cout << "Number of available cameras: " << num_cameras << endl;
+    std::cout << "Number of available cameras: " << num_cameras << std::endl;
 
     if(num_cameras < 1) {
 
-        cerr << "No camera connected. Stopping application..." << endl;
+        std::cerr << "No camera connected. Stopping application..." << std::endl;
 
         return -1;
 
@@ -66,7 +64,7 @@ int main(void)
      */
     // [GUID]
 
-    cout << "Getting camera's GUIDs..." << endl;
+    std::cout << "Getting camera's GUIDs..." << std::endl;
 
     FlyCapture2::PGRGuid guid[num_cameras];
 
@@ -74,7 +72,7 @@ int main(void)
 
         if(Camera::get_guid(i, &guid[i])) {
 
-            cerr << "Can't get GUID of camera " << i << endl;
+            std::cerr << "Can't get GUID of camera " << i << std::endl;
 
             return -1;
         }
@@ -89,7 +87,7 @@ int main(void)
      */
     // [Connect]
 
-    cout << "Connecting to all available cameras..." << endl;
+    std::cout << "Connecting to all available cameras..." << std::endl;
 
     Camera camera[num_cameras];
 
@@ -97,11 +95,11 @@ int main(void)
 
         if(camera[i].connect(&guid[i]) != FlyCapture2::PGRERROR_OK) {
 
-            cerr << "Can't connect to camera " << i << endl;
+            std::cerr << "Can't connect to camera " << i << std::endl;
 
         }
 
-        cout << "Serial number" << ": " << camera[i].get_serial_number() << endl;
+        std::cout << "Serial number" << ": " << camera[i].get_serial_number() << std::endl;
 
     }
 
@@ -114,15 +112,15 @@ int main(void)
      */
     // [Configure]
 
-    cout << "Configuring all connected cameras..." << endl;
+    std::cout << "Configuring all connected cameras..." << std::endl;
 
     for(unsigned int i=0; i<num_cameras; i++) {
 
         if(camera[i].configure()) {
 
-            cerr << "Can't configure camera " << i << endl;
+            std::cerr << "Can't configure camera " << i << std::endl;
 
-            cout << "Disconnecting from all cameras" << endl;
+            std::cout << "Disconnecting from all cameras" << std::endl;
 
             for(unsigned int i=0; i<num_cameras; i++) {
 
@@ -145,7 +143,7 @@ int main(void)
      */
     // [CoRo Eyes properties]
 
-    cout << "Setting up cameras for CoRo Eyes..." << endl;
+    std::cout << "Setting up cameras for CoRo Eyes..." << std::endl;
 
     Camera::CameraPosition camera_position = Camera::CameraPosition::Undefined;
 
@@ -167,7 +165,7 @@ int main(void)
 
         default:
 
-            cerr << "Unrecognized camera (" << camera[i].get_serial_number() << ")." << endl;
+            std::cerr << "Unrecognized camera (" << camera[i].get_serial_number() << ")." << std::endl;
 
             break;
 
@@ -175,9 +173,9 @@ int main(void)
 
         if(camera[i].set_properties_for_coro_eyes(camera_position)) {
 
-            cerr << "Can't configure camera " << i << "." << endl;
+            std::cerr << "Can't configure camera " << i << "." << std::endl;
 
-            cout << "Disconnecting from all cameras" << endl;
+            std::cout << "Disconnecting from all cameras" << std::endl;
 
             for(unsigned int i=0; i<num_cameras; i++) {
 
@@ -217,7 +215,7 @@ int main(void)
      */
     // [Camera feeds]
 
-    cout << "Starting up camera feeds..." << endl;
+    std::cout << "Starting up camera feeds..." << std::endl;
 
     FrameInfo frame_info[num_cameras];
 
@@ -244,7 +242,7 @@ int main(void)
      */
     // [Start capture]
 
-    cout << "Starting captures..." << endl;
+    std::cout << "Starting captures..." << std::endl;
 
     for(unsigned int i=0; i<num_cameras; i++) {
 
@@ -283,7 +281,7 @@ int main(void)
      */
     // [Stop captures]
 
-    cout << "Stopping captures..." << endl;
+    std::cout << "Stopping captures..." << std::endl;
 
     for(unsigned int i=0; i<num_cameras; i++) {
 
@@ -300,7 +298,7 @@ int main(void)
      */
     // [Disconnect]
 
-    cout << "Disconnecting from all cameras..." << endl;
+    std::cout << "Disconnecting from all cameras..." << std::endl;
 
     for(unsigned int i=0; i<num_cameras; i++) {
 

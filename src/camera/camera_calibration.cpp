@@ -514,14 +514,14 @@ bool run_stereo_calibration(Settings& s, cv::Size image_size, StereoData& stereo
     double rms;
 
     if(s.useFisheye) {
-        rms = cv::fisheye::stereoCalibrate(objectPoints, camL_image_points, camR_image_points,
-                                           camL_calib_data.intrinsic, camL_calib_data.distorsion, camR_calib_data.intrinsic, camR_calib_data.distorsion,
+        rms = cv::fisheye::stereoCalibrate(objectPoints, camR_image_points, camL_image_points,
+                                           camR_calib_data.intrinsic, camR_calib_data.distorsion, camL_calib_data.intrinsic, camL_calib_data.distorsion,
                                            image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calibration_flags,
                                            cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 100, 1e-5));
     }
     else {
-        rms = cv::stereoCalibrate(objectPoints, camL_image_points, camR_image_points,
-                                  camL_calib_data.intrinsic, camL_calib_data.distorsion, camR_calib_data.intrinsic, camR_calib_data.distorsion,
+        rms = cv::stereoCalibrate(objectPoints, camR_image_points, camL_image_points,
+                                  camR_calib_data.intrinsic, camR_calib_data.distorsion, camL_calib_data.intrinsic, camL_calib_data.distorsion,
                                   image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calib_data.E, stereo_calib_data.F,
                                   stereo_calibration_flags, cv::TermCriteria(cv::TermCriteria::COUNT+cv::TermCriteria::EPS, 100, 1e-5));
     }
@@ -532,7 +532,7 @@ bool run_stereo_calibration(Settings& s, cv::Size image_size, StereoData& stereo
     stereo_calib_data.total_avg_error = rms;
 
     // Find rectification transforms for each camera
-    cv::stereoRectify(camL_calib_data.intrinsic, camL_calib_data.distorsion, camR_calib_data.intrinsic, camR_calib_data.distorsion,
+    cv::stereoRectify(camR_calib_data.intrinsic, camR_calib_data.distorsion, camL_calib_data.intrinsic, camL_calib_data.distorsion,
                       image_size, stereo_calib_data.R, stereo_calib_data.T, stereo_calib_data.R1, stereo_calib_data.R2, stereo_calib_data.P1, stereo_calib_data.P2, stereo_calib_data.Q,
                       cv::CALIB_ZERO_DISPARITY, 1, image_size, &stereo_calib_data.validROI1, &stereo_calib_data.validROI2);
 
@@ -644,14 +644,14 @@ bool save_stereo_calibration(std::string file_name, Settings& s, cv::Size image_
             cv::Mat imgpti(camL_image_points[i]);
             imgpti.copyTo(r);
         }
-        fs << "cam1_image_points" << imagePtMat;
+        fs << "camL_image_points" << imagePtMat;
 
         for(size_t i=0; i<camR_image_points.size(); i++) {
             cv::Mat r = imagePtMat.row(int(i)).reshape(2, imagePtMat.cols);
             cv::Mat imgpti(camR_image_points[i]);
             imgpti.copyTo(r);
         }
-        fs << "cam2_image_points" << imagePtMat;
+        fs << "camR_image_points" << imagePtMat;
     }
 
     return true;
@@ -713,9 +713,9 @@ bool calculate_stereo_reproj_maps(Data& camL_calib_data, Data& camR_calib_data, 
 
     // Generate stereo rectify maps from provided calibration data
     cv::initUndistortRectifyMap(camL_calib_data.intrinsic, camL_calib_data.distorsion,
-                                stereo_calib_data.R1, stereo_calib_data.P1, image_size, CV_32FC1, reproj_maps_L.mapx, reproj_maps_L.mapy);
+                                stereo_calib_data.R2, stereo_calib_data.P2, image_size, CV_32FC1, reproj_maps_L.mapx, reproj_maps_L.mapy);
     cv::initUndistortRectifyMap(camR_calib_data.intrinsic, camR_calib_data.distorsion,
-                                stereo_calib_data.R2, stereo_calib_data.P2, image_size, CV_32FC1, reproj_maps_R.mapx, reproj_maps_R.mapy);
+                                stereo_calib_data.R1, stereo_calib_data.P1, image_size, CV_32FC1, reproj_maps_R.mapx, reproj_maps_R.mapy);
 
     return true;
 }
@@ -750,12 +750,13 @@ bool remap_images(std::vector<cv::Mat>& original_images, ReprojMaps &reproj_maps
  * @brief Estimate the pose of a camera in relation to a user-defined reference frame using
  * real life coordinates of chessboard corners.
  * @param calib_data: Structure containing the camera calibration results (see Calibration::Data)
+ * @param stereo_calib_data: Structure containing the stereo camera calibration results (see Calibration::StereoData)
  * @param object_points: Coordinates of the calibration board corners in the user-defined reference frame (3D)
  * @param image_points: Pixel coordinates of the same calibration board corners (see Calibration::find_corners) (2D)
  * @param [out] pose_data: Structure containing the pose estimation results (see Calibration::Pose)
  * @return True if the pose estimation succeeded
  */
-bool run_pose_estimation(Data& calib_data, std::vector<cv::Point3f>& object_points,
+bool run_pose_estimation(Data& calib_data, StereoData& stereo_calib_data, std::vector<cv::Point3f>& object_points,
                          std::vector<cv::Point2f>& image_points, Pose& pose_data)
 {
     bool success = false;
@@ -772,15 +773,31 @@ bool run_pose_estimation(Data& calib_data, std::vector<cv::Point3f>& object_poin
                                 rvecs, tvecs, false, cv::SOLVEPNP_ITERATIVE);
 
     if(success) {
-        // Convert rotation matrix to quaternions
+        // Convert rotation vector to matrix
         cv::Mat rmat;
         cv::Rodrigues(rvecs, rmat);
-        getQuaternion(rmat, pose_data.quaternions);
 
-        // Fill Pose data
-        pose_data.translation[0] = tvecs.at<double>(0,0);
-        pose_data.translation[1] = tvecs.at<double>(1,0);
-        pose_data.translation[2] = tvecs.at<double>(2,0);
+        // Create homogenous matrix
+        cv::Mat h, last_row;
+        cv::hconcat(rmat, tvecs, h);
+        cv::vconcat(h, cv::Mat::zeros(1, 4, CV_64FC1), h);
+        h.at<double>(3,3) = 1;
+
+        // Rotate to be in the reprojected coordinate system
+        cv::Mat r = stereo_calib_data.R2;
+        cv::hconcat(r, cv::Mat::zeros(3,1,CV_64FC1), r);
+        cv::vconcat(r, cv::Mat::zeros(1, 4, CV_64FC1), r);
+        r.at<double>(3,3) = 1;
+
+        h = r * h;
+
+        // Fill Pose data translation
+        pose_data.translation[0] = h.at<double>(0,3);
+        pose_data.translation[1] = h.at<double>(1,3);
+        pose_data.translation[2] = h.at<double>(2,3);
+
+        // Fill Pose data quaternions
+        getQuaternion(h, pose_data.quaternions);
     }
 
     return success;
@@ -822,6 +839,9 @@ bool save_pose_estimation(std::string file_name, Pose& pose_data)
     fs << "y" << pose_data.quaternions[1];
     fs << "z" << pose_data.quaternions[2];
     fs << "w" << pose_data.quaternions[3];
+
+    fs.writeComment(std::to_string(pose_data.translation[0]) + " " + std::to_string(pose_data.translation[1]) + " " + std::to_string(pose_data.translation[2]) + "\n" +
+            std::to_string(pose_data.quaternions[0]) + " " + std::to_string(pose_data.quaternions[1]) + " " + std::to_string(pose_data.quaternions[2]) + " " + std::to_string(pose_data.quaternions[3]));
 
     return true;
 }
