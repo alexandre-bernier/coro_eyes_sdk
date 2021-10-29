@@ -91,6 +91,7 @@ struct ReprojMaps {
 struct Pose {
     std::string frame;
     double translation[3], quaternions[4];
+    cv::Vec3f rpy;
 };
 
 bool find_corners(Settings& s, cv::Mat& image, std::vector<cv::Point2f>& image_points);

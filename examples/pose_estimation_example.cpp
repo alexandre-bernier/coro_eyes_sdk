@@ -356,9 +356,9 @@ int main(void)
         captured_image = camera[pose_cam_index].get_last_frame();
 
         // Undistort the captured image
-        cv::Mat undistored_captured_image;
-        cv::undistort(captured_image, undistored_captured_image, camera_calib_data[pose_cam_index].intrinsic, camera_calib_data[pose_cam_index].distorsion);
-        captured_image = undistored_captured_image;
+        cv::Mat undistorted_captured_image;
+        cv::undistort(captured_image, undistorted_captured_image, camera_calib_data[pose_cam_index].intrinsic, camera_calib_data[pose_cam_index].distorsion);
+        captured_image = undistorted_captured_image;
 
         // Try to find the chessboard corners
         good_image = Calibration::find_corners(calib_settings, captured_image, temp_image_points);
@@ -480,11 +480,6 @@ int main(void)
     }
     std::cout << std::endl;
 
-    object_points.push_back(cv::Point3f(17.6/100, 23.0/100, -1.4/100));
-    object_points.push_back(cv::Point3f(43.0/100, 23.0/100, -1.4/100));
-    object_points.push_back(cv::Point3f(17.6/100, 4.9/100, -1.4/100));
-    object_points.push_back(cv::Point3f(43.0/100, 4.9/100, -1.4/100));
-
     // [Get corner coordinates]
 
 
@@ -532,6 +527,11 @@ int main(void)
         std::cout << "\tY = " << pose_data.quaternions[1] << std::endl;
         std::cout << "\tZ = " << pose_data.quaternions[2] << std::endl;
         std::cout << "\tW = " << pose_data.quaternions[3] << std::endl;
+
+        std::cout << "RPY:" << std::endl;
+        std::cout << "\tX = " << pose_data.rpy[0] << std::endl;
+        std::cout << "\tY = " << pose_data.rpy[1] << std::endl;
+        std::cout << "\tZ = " << pose_data.rpy[2] << std::endl;
 
         std::cout << std::endl;
 

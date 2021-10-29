@@ -121,6 +121,34 @@ void getQuaternion(cv::Mat R, double Q[])
     }
 }
 
+/**
+ * @brief Convert an OpenCV rotation matrix into RPY.
+ * @details Taken from https://learnopencv.com/rotation-matrix-to-euler-angles/
+ * @param R: Rotation matrix of type cv::Mat
+ * @return Euler angles in RPY ordered as X, Y, Z
+ */
+cv::Vec3f rotationMatrixToEulerAngles(cv::Mat& R)
+{
+    float sy = sqrt(R.at<double>(0,0) * R.at<double>(0,0) + R.at<double>(1,0) * R.at<double>(1,0));
+
+    bool singular = sy < 1e-6;
+    float x, y, z;
+
+    if (!singular) {
+        x = atan2(R.at<double>(2,1), R.at<double>(2,2));
+        y = atan2(-R.at<double>(2,0), sy);
+        z = atan2(R.at<double>(1,0), R.at<double>(0,0));
+    }
+
+    else {
+        x = atan2(-R.at<double>(1,2), R.at<double>(1,1));
+        y = atan2(-R.at<double>(2,0), sy);
+        z = 0;
+    }
+
+    return cv::Vec3f(x, y, z);
+}
+
 namespace Calibration {
 
 // Write serialization for this class
@@ -798,6 +826,9 @@ bool run_pose_estimation(Data& calib_data, StereoData& stereo_calib_data, std::v
 
         // Fill Pose data quaternions
         getQuaternion(h, pose_data.quaternions);
+
+        // Fill rpy
+        pose_data.rpy = rotationMatrixToEulerAngles(h);
     }
 
     return success;
@@ -826,22 +857,27 @@ bool save_pose_estimation(std::string file_name, Pose& pose_data)
 
     fs << "calibration_time" << buf;
 
-    fs.writeComment("Pose of a user-defined frame in relation to the right camera.");
+    fs.writeComment("Pose of a user-defined frame in relation to the left camera.");
     fs << "frame" << pose_data.frame;
 
     fs.writeComment("Translation (m)");
     fs << "x" << pose_data.translation[0];
     fs << "y" << pose_data.translation[1];
     fs << "z" << pose_data.translation[2];
+    fs.writeComment(std::to_string(pose_data.translation[0]) + " " + std::to_string(pose_data.translation[1]) + " " + std::to_string(pose_data.translation[2]) + "\n");
 
     fs.writeComment("Quaternions");
     fs << "x" << pose_data.quaternions[0];
     fs << "y" << pose_data.quaternions[1];
     fs << "z" << pose_data.quaternions[2];
     fs << "w" << pose_data.quaternions[3];
+    fs.writeComment(std::to_string(pose_data.quaternions[0]) + " " + std::to_string(pose_data.quaternions[1]) + " " + std::to_string(pose_data.quaternions[2]) + " " + std::to_string(pose_data.quaternions[3]) + "\n");
 
-    fs.writeComment(std::to_string(pose_data.translation[0]) + " " + std::to_string(pose_data.translation[1]) + " " + std::to_string(pose_data.translation[2]) + "\n" +
-            std::to_string(pose_data.quaternions[0]) + " " + std::to_string(pose_data.quaternions[1]) + " " + std::to_string(pose_data.quaternions[2]) + " " + std::to_string(pose_data.quaternions[3]));
+    fs.writeComment("Euler angles (RPY)");
+    fs << "x" << pose_data.rpy[0];
+    fs << "y" << pose_data.rpy[1];
+    fs << "z" << pose_data.rpy[2];
+    fs.writeComment(std::to_string(pose_data.rpy[0]) + " " + std::to_string(pose_data.rpy[1]) + " " + std::to_string(pose_data.rpy[2]) + "\n");
 
     return true;
 }

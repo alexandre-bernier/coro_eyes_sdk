@@ -814,8 +814,6 @@ int main(void)
         return -1;
     }
 
-    disparity_map = disparity_map(stereo_calib_data.validROI2);
-
     // [Compute disparity map]
 
 
